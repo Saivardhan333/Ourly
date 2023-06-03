@@ -13,7 +13,12 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import DrawerNavigators from '../Components/DrawerNavigators';
 import Homes from './Homes';
+import axios from 'axios';
+import TimeTracker from './TimeTracker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const Login = ({navigation}) => {
   const [modal, setmodal] = useState(false);
   const [email, setemail] = useState('');
@@ -21,25 +26,43 @@ const Login = ({navigation}) => {
   const [showpassword, setshowpassword] = useState(true);
   const [checkValidEmail, setcheckValidEmail] = useState(false);
   const [Entrytext, setEntrytext] = useState(false);
+  const [forgotemail, setforgotemail] = useState();
+
   const emailhandle = () => {
+    const body = {email: email, password: password};
     const passwordvalidity = handlePasswordChange(password);
-    {
-      checkValidEmail
-        ? Alert.alert('please enter valid email address:')
-        : !passwordvalidity
-        ? navigation.navigate(Homes)
-        : Alert.alert(passwordvalidity);
+
+    if (checkValidEmail) {
+      Alert.alert('Please enter a valid email address.');
+    } else if (!passwordvalidity) {
+      console.log(body);
+      navigation.navigate(Homes);
+      axios
+        .post('http://192.168.0.207:4178/api/user/login/insert', body)
+        .then(response => {
+          const loginResponse = response?.data?.response;
+          console.log('login data', loginResponse);
+          // Store loginResponse in AsyncStorage
+          AsyncStorage.setItem('loginResponse', JSON.stringify(loginResponse))
+            .then(() => {
+              console.log('loginResponse stored in AsyncStorage.');
+            })
+            .catch(error => {
+              console.log(
+                'Error storing loginResponse in AsyncStorage:',
+                error,
+              );
+            });
+          navigation.navigate(Homes);
+        })
+        .catch(error => {
+          console.log('Something caused an error', error);
+        });
+    } else {
+      Alert.alert(passwordvalidity);
     }
-    //if (checkValidEmail) {
-    //  Alert.alert('please enter valid email address:');
-    //}
-    //const passwordvalidity = handlePasswordChange(password);
-    //if (!passwordvalidity) {
-    //  Alert.alert('success');
-    //} else {
-    //  Alert.alert(passwordvalidity);
-    //}
   };
+
   const handleEmailChange = text => {
     let re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     setemail(text);
@@ -55,26 +78,26 @@ const Login = ({navigation}) => {
       return 'Password must not contain Whitespaces.';
     }
 
-    const isContainsUppercase = /^(?=.*[A-Z]).*$/;
-    if (!isContainsUppercase.test(text)) {
-      return 'Password must have at least one Uppercase Character.';
-    }
+    // const isContainsUppercase = /^(?=.*[A-Z]).*$/;
+    // if (!isContainsUppercase.test(text)) {
+    //   return 'Password must have at least one Uppercase Character.';
+    // }
 
     const isContainsLowercase = /^(?=.*[a-z]).*$/;
     if (!isContainsLowercase.test(text)) {
       return 'Password must have at least one Lowercase Character.';
     }
-    const isspecialCharRegex = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
-    if (!isspecialCharRegex.test(text)) {
-      return 'password must contain atleast one special charecter';
-    }
+    // const isspecialCharRegex = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+    // if (!isspecialCharRegex.test(text)) {
+    //   return 'password must contain atleast one special charecter';
+    // }
 
     const isContainsNumber = /^(?=.*[0-9]).*$/;
     if (!isContainsNumber.test(text)) {
       return 'Password must contain at least one Digit.';
     }
 
-    const isValidLength = /^.{8,16}$/;
+    const isValidLength = /^.{8,15}$/;
     if (!isValidLength.test(text)) {
       return 'Password must be 8-16 Characters Long.';
     }
@@ -90,6 +113,16 @@ const Login = ({navigation}) => {
   const hidepassword = () => {
     setEntrytext(!Entrytext);
   };
+  function forgotpass(text) {
+    setforgotemail(text);
+  }
+  function sendEmail() {
+    const gg = {email: forgotemail};
+    axios
+      .post('http://192.168.0.207:4178/api/user/send/forget/password/link', gg)
+      .then(response => console.log(response.data.response))
+      .catch(error => console.log(error));
+  }
   return (
     <View onTouchStart={() => Keyboard.dismiss()}>
       <ImageBackground
@@ -142,7 +175,10 @@ const Login = ({navigation}) => {
                 <Text style={styles.forg}>ForgotPassword</Text>
               </TouchableOpacity>
             </View>
-            <Modal transparent={true} visible={modal}>
+            <Modal
+              transparent={true}
+              visible={modal}
+              keyboardShouldPersistTaps="handled">
               <View style={{backgroundColor: '#000000aa', flex: 1}}>
                 <View style={{flex: 2}}></View>
                 <View
@@ -165,16 +201,13 @@ const Login = ({navigation}) => {
                     }}>
                     <View>
                       <TextInput
-                        style={{
-                          borderWidth: 2,
-                          height: 50,
-                          width: 300,
-                          fontSize: 20,
-                          borderRadius: 10,
-                        }}
-                        placeholder="Enter your email address"></TextInput>
+                        style={styles.userinput}
+                        onChangeText={forgotpass}
+                        value={forgotemail}
+                        placeholder="Enter your email address"
+                        placeholderTextColor={(color = 'black')}></TextInput>
                     </View>
-                    <Button title="Send Email"></Button>
+                    <Button title="Send Email" onPress={sendEmail}></Button>
                     <Button
                       title="Close"
                       onPress={() => {

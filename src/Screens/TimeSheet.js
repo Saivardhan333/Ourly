@@ -1,30 +1,77 @@
 import React, {useEffect, useState} from 'react';
+import {useFocusEffect} from '@react-navigation/native';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import DateRangePickers from 'react-native-daterange-picker';
 import moment from 'moment';
 import Icons from 'react-native-vector-icons/AntDesign';
-import {TouchableOpacity} from 'react-native-gesture-handler';
 import axios from 'axios';
 
 const TimeSheet = () => {
-  const [projectData, setProjectData] = useState([]);
   const [project, setproject] = useState([]);
   const [startofweek, setstartofweek] = useState();
   const [endofweek, setendofweek] = useState();
   const [loading, setLoading] = useState(true);
-  const abc = {
+  const [submit, setsubmit] = useState(true);
+  const [submitData, setsubmitData] = useState(false);
+  // Retrieve the data
+  let abc = {
     first_week_day: startofweek,
     last_week_day: endofweek,
-    employee_id: 2660,
+    employee_id: 982,
+  };
+  const retrieveData = async () => {
+    try {
+      const storedResponse = await AsyncStorage.getItem('loginResponse');
+      if (storedResponse !== null) {
+        const loginResponse = JSON.parse(storedResponse);
+        abc = abc.employee_id = loginResponse[0].employee_id;
+
+        // Use the retrieved data in your screen
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
+  function submitFunction() {
+    setsubmit(!submit);
+    if (submit) {
+      axios
+        .post(
+          'http://192.168.0.207:4178/api/approvals/on/submit/for/approval',
+          abc,
+        )
+        .then(response => {
+          if (response.data.status === 200) {
+            console.log('success');
+            //const updatedStatus = 'Approval Pending';
+            //     axios
+            //       .post(
+            //         'http://192.168.0.207:4178/api/approvals/on/submit/for/approval',
+            //         {status: updatedStatus},
+            //       )
+            //       .then(response => console.log('updated data', response.data));
+          }
+        })
+        .catch(error => console.log(error));
+    } else {
+      console.log('withdraw');
+      axios
+        .post('http://192.168.0.207:4178/api/timesheet/on/withdraw', abc)
+        .then(response => response);
+    }
+  }
+  function submitD() {}
+
   useEffect(() => {
+    retrieveData;
     setLoading(true);
     axios
       .post(
@@ -45,6 +92,7 @@ const TimeSheet = () => {
           total_hour: val.total_hour,
         }));
         setproject(updatedProject);
+
         setLoading(false);
       })
       .catch(error => {
@@ -71,14 +119,14 @@ const TimeSheet = () => {
     setStartDate(weekDates[0]);
     setEndDate(weekDates[1]);
   }, [value]);
-  console.log(startofweek, endofweek);
+  //console.log(startofweek, endofweek);
   const setDates = (dates, displayedDates) => {
     if (dates.startDate) {
-      console.log(dates.startDate.format('YYYY-MM-DD'));
+      // console.log(dates.startDate.format('YYYY-MM-DD'));
       setValue(dates.startDate.format('YYYY-MM-DD'));
       setweekdata(true);
     } else if (dates.endDate) {
-      console.log(dates.endDate.format('YYYY-MM-DD'));
+      //console.log(dates.endDate.format('YYYY-MM-DD'));
       setValue(dates.endDate.format('YYYY-MM-DD')); // Update the value as needed when no start date is selected
     }
     if (dates.displayedDate) {
@@ -303,11 +351,45 @@ const TimeSheet = () => {
                   <Text style={{color: 'white'}}>{item.friday}</Text>
                   <Text style={{color: 'white'}}>{item.saturday}</Text>
                   <Text style={{color: 'white'}}>{item.sunday}</Text>
-                  <Text style={{color: 'white'}}>{item.total_hour}</Text>
+                  <Text style={{color: 'white'}}>
+                    {item.total_hour}
+                    {submitD}
+                  </Text>
                 </View>
               </View>
             )}
-            ListFooterComponent={<View style={{height: 50}} />}
+            ListFooterComponent={
+              <View
+                style={{
+                  height: 100,
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
+                  marginRight: 10,
+                }}>
+                <View>
+                  {project[0] ? (
+                    <TouchableOpacity
+                      onPress={submitFunction}
+                      style={{
+                        backgroundColor: 'lightblue',
+                        width: 100,
+                        borderWidth: 2,
+                        padding: 8,
+                        borderRadius: 8,
+                        fontWeight: 'bold',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}>
+                      <Text style={{fontSize: 18, color: 'white'}}>
+                        {submit ? 'Submit' : 'Withdraw'}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Text></Text>
+                  )}
+                </View>
+              </View>
+            }
           />
         </View>
       )}

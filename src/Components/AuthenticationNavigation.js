@@ -2,7 +2,7 @@ import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import SplashScreen from '../Screens/SplashScreen';
 import Login from '../Screens/Login';
-import Homes from '../Screens/Homes';
+
 import BottomTabNavigato from './BottomTabNavigator';
 import DrawerNavigators from './DrawerNavigators';
 
@@ -12,11 +12,6 @@ function AuthenticationNavigation() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Homes"
-        component={DrawerNavigators}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
         name="SplashScreen"
         component={SplashScreen}
         options={{headerShown: false}}
@@ -24,6 +19,11 @@ function AuthenticationNavigation() {
       <Stack.Screen
         name="Login"
         component={Login}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Homes"
+        component={DrawerNavigators}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

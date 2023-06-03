@@ -13,7 +13,6 @@ import {
   AppState,
   FlatList,
 } from 'react-native';
-import maindata from './data.json';
 import moment from 'moment';
 import Dropdown from 'react-native-dropdown-picker';
 import Icons from 'react-native-vector-icons/AntDesign';
@@ -24,9 +23,9 @@ import TimeTracker1 from './TimeTracker1';
 import BackgroundTimer from 'react-native-background-timer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import {useFocusEffect} from '@react-navigation/native';
 
 const TimeTracker = props => {
-  let stopwatchtime = '';
   const [workchild, setworkchild] = useState('');
   const [Added, setAdded] = useState([]);
   const [Added1, setAdded1] = useState([]);
@@ -36,11 +35,9 @@ const TimeTracker = props => {
   const [isStopwatchStart, setIsStopwatchStart] = useState(false);
   const [stopWatchStart, setstopWatchStart] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-
   const currentTime = new Date().toLocaleTimeString();
   const endTime = new Date().toLocaleTimeString();
-
-  const currentDate = new Date().toLocaleDateString();
+  const currentDate = moment().format('YYYY-MM-DD');
   const [stopWatchTime, setStopwatchTime] = useState('');
   const [nseconds, setSeconds] = useState(0);
   const [nminutes, setMinutes] = useState(0);
@@ -51,14 +48,39 @@ const TimeTracker = props => {
   const [main, setmain] = useState();
   const [header, setheader] = useState();
   const [child, setchild] = useState();
-  const [data, setdata] = useState(maindata);
+  const [data, setdata] = useState([]);
+  const [dt, setdt] = useState();
   const d = [];
   const d1 = [];
   const d2 = [];
-  //const [timetime, settimetime] = useState();
+  let employeeid = 0;
+  useEffect(() => {
+    const retrieveData = async () => {
+      try {
+        const storedResponse = await AsyncStorage.getItem('loginResponse');
+        if (storedResponse !== null) {
+          const loginResponse = JSON.parse(storedResponse);
+          employeeid = {employee_id: loginResponse[0].employee_id};
+          const response = await axios.post(
+            'http://192.168.0.207:4178/api/timetracking/get/all/weeks/task/details/by/employeeid/list',
+            employeeid,
+          );
+          const resdata = response.data.response.map(val => val);
+          setdata(resdata);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    retrieveData();
+  }, []);
+
   let timetime = '';
   useEffect(() => {
     let interval;
+    let startTime;
+
     if (isRunning) {
       interval = BackgroundTimer.setInterval(() => {
         setSeconds(seconds => {
@@ -76,22 +98,26 @@ const TimeTracker = props => {
         });
       }, 1000);
 
-      AsyncStorage.setItem('startTimes', new Date().getTime().toString());
+      startTime = new Date().getTime().toString();
+      AsyncStorage.setItem('startTimes', startTime);
     }
 
     return () => {
       BackgroundTimer.clearInterval(interval);
+      if (isRunning) {
+        AsyncStorage.removeItem('startTimes');
+      }
     };
   }, [isRunning]);
   useEffect(() => {
-    AsyncStorage.getItem('startTimes').then(startTimeString => {
+    const retrieveStartTime = async () => {
+      const startTimeString = await AsyncStorage.getItem('startTimes');
       if (startTimeString !== null) {
         const startTime = parseInt(startTimeString);
         const elapsed = new Date().getTime() - startTime;
         const hours = Math.floor(elapsed / (1000 * 60 * 60));
         const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
-
         setHours(hours);
         setMinutes(minutes);
         setSeconds(seconds);
@@ -99,110 +125,24 @@ const TimeTracker = props => {
         setIsStopwatchStart(true);
         AsyncStorage.removeItem('startTimes');
       }
-    });
-    // data.map(val => {
-    //   val.map(val => {
-    //     d2.push({
-    //       startDate: val.isApp.startDate + '-' + val.isApp.endDate,
-    //       status: val.isApp.status,
-    //       weekHour: val.isApp.weekHour,
-    //     });
-    //   });
-    // });
-    // const responseData = data.map(val => {
-    //   val.map(val => {
-    //     val.head.map(val => {
-    //       d1.push({
-    //         header: val.header.day + ',' + val.header.month,
-    //         hours: val.header.hours,
-    //       });
-    //       val.child.map(
-    //         val =>
-    //           d.push({
-    //             task_description: val.task_description,
-    //             project_name: val.project_name,
-    //             tag_name: val.tag_name,
-    //             task_start_time: val.task_start_time,
-    //             task_end_time: val.task_end_time,
-    //             task_created_datetime: val.task_created_datetime,
-    //             task_total_time: val.task_total_time,
-    //           }),
-    //         //setchild({task_description: val.task_description}),
-    //       );
-    //     });
-    //   });
-    // });
+    };
 
-    // const responseDataa = data.map(val => {
-    //   val.map(val => {
-    //     val.head.map(val =>
-    //       val.child.map(
-    //         val =>
-    //           d.push({
-    //             task_description: val.task_description,
-    //             project_name: val.project_name,
-    //             tag_name: val.tag_name,
-    //             task_start_time: val.task_start_time,
-    //             task_end_time: val.task_end_time,
-    //             task_created_datetime: val.task_created_datetime,
-    //             task_total_time: val.task_total_time,
-    //           }),
-    //         //setchild({task_description: val.task_description}),
-    //       ),
-    //     );
-    //   });
-    // });
-
-    const ldata = {};
-    maindata.map(val => {
-      val.map(val => {
-        val.head.map(val =>
-          val.child.map(vall => {
-            ldata.task_description = vall.task_description;
-            ldata.project_id = 3433;
-            ldata.employee_id = 982;
-            ldata.task_start_time = vall.task_start_time;
-            ldata.task_end_time = vall.task_end_time;
-            ldata.task_created_datetime = vall.task_created_datetime;
-          }),
-        );
-      });
-    });
-    console.log(
-      'dagdagda',
-      ldata.task_description,
-      ldata.project_id,
-      ldata.employee_id,
-      ldata.task_start_time,
-      ldata.task_end_time,
-      ldata.task_created_datetime,
-    );
-
-    // const res = axios
-    //   .post(
-    //     'http://192.168.0.88:4178/api/timetracking/add/task/details/insert',
-    //     ldata,
-    //   )
-    //   .then(response => {
-    //     console.log('lalalalal', response.data);
-    //   })
-    //   .catch(error => {
-    //     console.error('mmmmmmmmm', error);
-    //   });
+    retrieveStartTime();
   }, []);
 
-  data.map(val => {
-    val.map(vall => {
+  data.forEach(val => {
+    val.forEach(vall => {
       d2.push({
         startDate: vall.isApp.startDate + '-' + vall.isApp.endDate,
-        status: vall.isApp.status,
+        status: vall.isApp.status !== 'SUBMIT' ? vall.isApp.status : '',
         weekHour: vall.isApp.weekHour,
       });
     });
   });
-  const responseData = data.map(val => {
-    val.map(val => {
-      val.head.map(val => {
+
+  data.forEach(val => {
+    val.forEach(val => {
+      val.head.forEach(val => {
         d1.push({
           header: val.header.day + ',' + val.header.month,
           hours: val.header.hours,
@@ -210,54 +150,111 @@ const TimeTracker = props => {
       });
     });
   });
-  const responseDataa = data.map(val => {
-    val.map(val => {
-      val.head.map(val => {
-        val.child.map(
-          val =>
-            d.push({
-              task_description: val.task_description,
-              project_name: val.project_name,
-              tag_name: val.tag_name,
-              task_start_time: val.task_start_time,
-              task_end_time: val.task_end_time,
-              task_created_datetime: val.task_created_datetime,
-              task_total_time: val.task_total_time,
-              date: val.date,
-              task_child_id: val.task_child_id,
-            }),
-          //setchild({task_description: val.task_description}),
-        );
-      });
-    });
-  });
 
-  // console.log('headerjhsfgh', d1);
-  // console.log('laskjdfh', d);
-  const deletecard = id => {
-    dd = data.map(val1 => {
-      val1.map(val2 => {
-        val2.head.map(val3 => {
-          val3.child.filter(val => {
-            val.task_child_id !== id;
+  data.forEach(val => {
+    val.forEach(val => {
+      val.head.forEach(val => {
+        val.child.forEach(val => {
+          d.push({
+            task_description: val.task_description,
+            project_name: val.project_name,
+            tag_name: val.tag_name,
+            task_start_time: val.task_start_time,
+            task_end_time: val.task_end_time,
+            task_created_datetime: val.task_created_datetime,
+            task_total_time: val.task_total_time,
+            date: val.date,
+            task_child_id: val.task_child_id,
           });
         });
       });
     });
-  };
+  });
+
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     retrieveData();
+  //   }, []),
+  // );
+  // const retrieveData = async () => {
+  //   try {
+  //     const storedResponse = await AsyncStorage.getItem('loginResponse');
+  //     if (storedResponse !== null) {
+  //       const loginResponse = JSON.parse(storedResponse);
+  //       const uu = {employee_id: loginResponse[0].employee_id};
+  //       const res = axios
+  //         .post(
+  //           'http://192.168.0.207:4178/api/timetracking/get/all/weeks/task/details/by/employeeid/list',
+  //           uu,
+  //         )
+  //         .then(response => {
+  //           const resdata = response.data.response.map(val => val);
+  //           setdata(resdata);
+  //           // val1.map(val => {
+  //           //   d2.push({
+  //           //     startDate: val.isApp.startDate + '-' + val.isApp.endDate,
+  //           //     status: val.isApp.status,
+  //           //     weekHour: val.isApp.weekHour,
+  //           //   });
+  //           // }),
+  //         })
+
+  //         .catch(error => {
+  //           console.error(error);
+  //         });
+
+  //       // setdt({employee_id: loginResponse[0].employee_id});
+
+  //       // Use the retrieved data in your screen
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  // console.log('headerjhsfgh', d1);
+  // console.log('laskjdfh', d);
+  // const deletecard = id => {
+  //   dd = data.map(val1 => {
+  //     val1.map(val2 => {
+  //       val2.head.map(val3 => {
+  //         val3.child.filter(val => {
+  //           val.task_child_id !== id;
+  //         });
+  //       });
+  //     });
+  //   });
+  // };
 
   const onPressStopwatch = () => {
     if (!isStopwatchStart) {
       setIsRunning(true);
     } else {
       if (workchild && currentValuechild) {
-        setStopwatchTime(nhours + ':' + nminutes + ':' + nseconds);
+        const details = {
+          task_description: workchild,
+          project_id: 6113,
+          employee_id: employeeid,
+          task_start_time: currentTime.substring(0, 5),
+          task_end_time: formattedTime.substring(0, 5),
+          task_created_datetime: currentDate,
+        };
+
+        axios
+          .post(
+            'http://192.168.0.207:4178/api/timetracking/add/task/details/insert',
+            details,
+          )
+          .then(response => response.data.response)
+          .catch(error => console.log(error));
+
+        const stopwatchTime = `${nhours}:${nminutes}:${nseconds}`;
+        setStopwatchTime(stopwatchTime);
         setIsRunning(false);
         setSeconds(0);
         setMinutes(0);
         setHours(0);
         Adding();
-        setIsStopwatchStart(!isStopwatchStart);
       } else {
         Alert.alert(
           'Confirmation',
@@ -287,13 +284,30 @@ const TimeTracker = props => {
   };
 
   const Items1 = [
-    {label: 'Dancing', value: 'dancing'},
-    {label: 'Playing', value: 'playing'},
-    {label: 'Internal Attended', value: 'Internal Attended'},
-    {label: 'Runing', value: 'Runing'},
-    {label: 'roming', value: 'roming'},
-    {label: 'romeo', value: 'romeo'},
-    {label: 'Singing', value: 'singing'},
+    {label: 'Apigee', value: 'dancing'},
+    {
+      label: 'BOB Finance Integration Platform',
+      value: 'bOB finance integration platform',
+    },
+    {label: 'Internal Attended', value: 'internal attended'},
+    {label: 'Burger King', value: 'burger king'},
+    {label: 'Catholic Syrian Bank', value: 'catholic syrian bank'},
+    {label: 'Certification', value: 'certification'},
+    {label: 'City Union Banknging', value: 'city union banknging'},
+    {label: 'Client Holiday', value: 'client holiday'},
+    {label: 'Desker', value: 'desker'},
+    {label: 'Desynova -Aspera - Hourly', value: 'desynova -aspera - hourly'},
+    {label: 'Digital Marketing', value: 'digital marketing'},
+    {label: 'Dream Housie', value: 'dream housie'},
+    {label: 'Euronet Sterling Gateway', value: 'euronet sterling gatewayv'},
+    {label: 'External Trainings', value: 'external trainings'},
+    {label: 'Hawq-i', value: 'Hawq-i'},
+    {label: 'Holiday', value: 'holiday'},
+    {label: 'Human Resource', value: 'human resource'},
+    {label: 'Indian Overseas bank', value: 'indian overseas bank'},
+    {label: 'Internal Meetings', value: 'internal meetings'},
+    {label: 'JANA Bank', value: 'jana Bank'},
+    {label: 'Karnataka Bank Ltd', value: 'karnataka Bank Ltd'},
   ];
   // const saveCurrentDateToLocalStorage=async(()=>{
   //   let currentDates=
@@ -305,48 +319,122 @@ const TimeTracker = props => {
   const [hours, minutes, seconds] = newTime.split(':').map(parseFloat);
   const milliseconds1 =
     hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000;
-  //const [hours1, minutes1, seconds1] = stopWatchTime.split(':').map(parseFloat);
   const milliseconds2 =
     nhours * 60 * 60 * 1000 + nminutes * 60 * 1000 + nseconds * 1000;
   let addedtime = milliseconds1 + milliseconds2;
   let seconds2 = Math.floor(addedtime / 1000);
 
-  // Extract hours, minutes and seconds
+  // Extract hours, minutes, and seconds
   let hours2 = Math.floor(seconds2 / 3600);
   seconds2 %= 3600;
   let minutes2 = Math.floor(seconds2 / 60);
   seconds2 %= 60;
 
-  // Format hours, minutes and seconds as strings with leading zeros
+  // Format hours, minutes, and seconds as strings with leading zeros
   let formattedHours = String(hours2).padStart(2, '0');
   let formattedMinutes = String(minutes2).padStart(2, '0');
   let formattedSeconds = String(seconds2).padStart(2, '0');
 
-  // Combine hours, minutes and seconds into formatted time string
+  // Combine hours, minutes, and seconds into a formatted time string
   let formattedTime = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+
   function Adding() {
     let datach = Added1;
-    {
-      workchild == ''
-        ? Alert.alert('please fill working details')
-        : currentValuechild == ''
-        ? Alert.alert('please fill project details')
-        : datach.push({
-            title: startOfWeek + '-' + endOfWeek,
-            data: [
-              workchild,
-              currentValuechild,
-              currentTime,
-              formattedTime,
-              currentDate,
-              timetime,
-            ],
-          });
+    if (workchild === '') {
+      Alert.alert('please fill working details');
+    } else if (currentValuechild === '') {
+      Alert.alert('please fill project details');
+    } else {
+      datach.push({
+        title: startOfWeek + '-' + endOfWeek,
+        data: [
+          workchild,
+          currentValuechild,
+          currentTime,
+          formattedTime,
+          currentDate,
+          timetime,
+        ],
+      });
     }
     setAdded1(datach);
     setworkchild('');
     setCurrentValuechild('');
   }
+  const renderItem = () =>
+    data.map(val =>
+      val.map(val1 => (
+        <>
+          <View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                backgroundColor: 'black',
+                marginBottom: 10,
+              }}>
+              <Text style={{color: '#fff'}}>
+                {val1.isApp.startDate}-{val1.isApp.endDate}
+              </Text>
+              <Text style={{color: '#fff'}}>{val1.isApp.weekHour}</Text>
+            </View>
+            {val1.head.map(val2 => (
+              <>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    backgroundColor: '#fff',
+                    marginBottom: 10,
+                  }}>
+                  <Text>
+                    {val2.header.day}
+                    {val2.header.month}
+                  </Text>
+                  <Text>{val2.header.hours}</Text>
+                </View>
+                {val2.child.map(val3 => (
+                  <View
+                    style={{
+                      flex: 1,
+                      flexDirection: 'row',
+                      backgroundColor: 'gray',
+                      marginBottom: 10,
+                      padding: 10,
+                      borderRadius: 10,
+                    }}>
+                    <View style={{flex: 4}}>
+                      <Text>Work Discription</Text>
+                      <Text>Project Name</Text>
+                      <Text>Start Time</Text>
+                      <Text>End Time</Text>
+                      <Text>Task created Date</Text>
+                      <Text>Task Total Time</Text>
+                    </View>
+                    <View style={{flex: 2}}>
+                      <Text style={{color: 'white'}}>:</Text>
+                      <Text style={{color: 'white'}}>:</Text>
+                      <Text style={{color: 'white'}}>:</Text>
+                      <Text style={{color: 'white'}}>:</Text>
+                      <Text style={{color: 'white'}}>:</Text>
+                      <Text style={{color: 'white'}}>:</Text>
+                    </View>
+                    <View style={{flex: 4}}>
+                      <Text>{val3.task_description}</Text>
+                      <Text>{val3.project_name}</Text>
+                      <Text>{val3.task_start_time}</Text>
+                      <Text>{val3.task_end_time}</Text>
+                      <Text>{val3.task_created_datetime}</Text>
+                      <Text>{val3.task_total_time}</Text>
+                    </View>
+                  </View>
+                ))}
+              </>
+            ))}
+          </View>
+        </>
+      )),
+    );
   return (
     <View style={styles.container}>
       <View style={{flex: 3}}>
@@ -474,7 +562,7 @@ const TimeTracker = props => {
         </View>
       </View>
       <View style={{flex: 7, zIndex: -1}}>
-        {Added.length > 0 ? (
+        {/* {Added.length > 0 ? (
           <SectionList
             sections={Added}
             renderItem={({item, title}) => (
@@ -498,121 +586,68 @@ const TimeTracker = props => {
               </Text>
             )}
           />
-        ) : null}
+        ) : null} */}
 
-        {Added1.length > 0 ? (
+        {data ? (
           <FlatList
-            data={d2}
-            renderItem={({item}) => (
-              <View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    backgroundColor: '#6c757d',
-                    height: 30,
-                    alignItems: 'center',
-                    borderRadius: 5,
-                    marginBottom: 5,
-                    padding: 5,
-
-                    borderWidth: 2,
-                  }}>
-                  <Text style={{color: 'white'}}>{item.startDate}</Text>
-                  <Text style={{color: 'white'}}>{item.status}</Text>
-                  <Text style={{color: 'white'}}>{item.weekHour}</Text>
-                </View>
-                <FlatList
-                  data={d1}
-                  renderItem={({item}) => (
-                    <View>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          backgroundColor: '#adb5bd',
-                          justifyContent: 'space-between',
-                          height: 25,
-                          alignItems: 'center',
-                          borderRadius: 4,
-                          padding: 4,
-                          marginTop: 10,
-                          borderWidth: 1.5,
-                        }}>
-                        <Text style={{color: 'black'}}>{item.header}</Text>
-                        <Text style={{color: 'black'}}>{item.month}</Text>
-                        <Text style={{color: 'black'}}>{item.hours}</Text>
-                      </View>
-                      <FlatList
-                        data={d.filter(task => task.date.includes(item.header))}
-                        renderItem={({item}) => (
-                          <View
-                            style={{
-                              backgroundColor: '#ced4da',
-                              justifyContent: 'space-between',
-                              borderRadius: 10,
-                              marginTop: 10,
-                              padding: 10,
-                              borderWidth: 1,
-                            }}>
-                            <View
-                              style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                              }}>
-                              <View>
-                                <Text style={{color: 'black'}}>
-                                  {item.task_description}
-                                </Text>
-                                <Text style={{color: 'black'}}>
-                                  {item.project_name}-----{item.tag_name}
-                                </Text>
-                                <Text style={{color: 'black'}}>
-                                  {item.task_start_time}-{item.task_end_time}
-                                </Text>
-                                <Text style={{color: 'black'}}>
-                                  {item.task_created_datetime}
-                                </Text>
-                                <Text style={{color: 'black'}}>
-                                  {item.task_total_time}
-                                </Text>
-                              </View>
-                              <View
-                                style={{
-                                  flexDirection: 'row',
-                                  justifyContent: 'space-around',
-
-                                  width: '35%',
-                                }}>
-                                <TouchableOpacity
-                                  onPress={deletecard(item.task_child_id)}>
-                                  <Iconss
-                                    name="delete"
-                                    size={20}
-                                    color="black"
-                                  />
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                  onPress={() => setModalVisible(true)}>
-                                  <Iconsss
-                                    name="edit"
-                                    size={20}
-                                    color="black"
-                                  />
-                                </TouchableOpacity>
-                              </View>
-                            </View>
-                          </View>
-                        )}
-                        keyExtractor={(item, index) => index.toString()}
-                      />
-                    </View>
-                  )}
-                />
-              </View>
-            )}
-            keyExtractor={(item, index) => index.toString()}
+            data={[null]}
+            keyExtractor={() => 'key'}
+            renderItem={renderItem}
           />
         ) : (
+          // data.map(val =>
+          //   val.map(val1 => (
+          //     <ScrollView>
+          //       <View>
+          //         <View
+          //           style={{
+          //             flexDirection: 'row',
+          //             justifyContent: 'space-between',
+          //             backgroundColor: 'black',
+          //             marginBottom: 10,
+          //           }}>
+          //           <Text style={{color: '#fff'}}>
+          //             {val1.isApp.startDate}-{val1.isApp.endDate}
+          //           </Text>
+          //           <Text style={{color: '#fff'}}>{val1.isApp.weekHour}</Text>
+          //         </View>
+          //         {val1.head.map(val2 => (
+          //           <>
+          //             <View
+          //               style={{
+          //                 flexDirection: 'row',
+          //                 justifyContent: 'space-between',
+          //                 backgroundColor: '#fff',
+          //                 marginBottom: 10,
+          //               }}>
+          //               <Text>
+          //                 {val2.header.day}
+          //                 {val2.header.month}
+          //               </Text>
+          //               <Text>{val2.header.hours}</Text>
+          //             </View>
+          //             {val2.child.map(val3 => (
+          //               <View
+          //                 style={{
+          //                   backgroundColor: 'gray',
+          //                   marginBottom: 10,
+          //                   padding: 10,
+          //                   borderRadius: 10,
+          //                 }}>
+          //                 <Text>{val3.task_description}</Text>
+          //                 <Text>{val3.project_name}</Text>
+          //                 <Text>{val3.task_start_time}</Text>
+          //                 <Text>{val3.task_end_time}</Text>
+          //                 <Text>{val3.task_created_datetime}</Text>
+          //                 <Text>{val3.task_total_time}</Text>
+          //               </View>
+          //             ))}
+          //           </>
+          //         ))}
+          //       </View>
+          //     </ScrollView>
+          //   )),
+          // )
           // <SectionList
           //   sections={Added1}
           //   renderItem={({item, title}) => (
@@ -710,7 +745,6 @@ const options = {
     padding: 8,
     borderRadius: 8,
     backgroundColor: 'white',
-
     width: 170,
   },
   text: {

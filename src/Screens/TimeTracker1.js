@@ -11,6 +11,7 @@ import {
   SectionList,
 } from 'react-native';
 import moment from 'moment';
+import axios from 'axios';
 import CustomNavbar from '../Components/CustomNavbar';
 import {
   TextInput,
@@ -26,6 +27,7 @@ import {Calendar, LocaleConfig} from 'react-native-calendars';
 import {Stopwatch, Timer} from 'react-native-stopwatch-timer';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {black} from 'react-native-paper/lib/typescript/src/styles/themes/v2/colors';
+import {scrollTo} from 'react-native-reanimated';
 LocaleConfig.locales['fr'] = {
   monthNames: [
     'January',
@@ -168,35 +170,64 @@ const TimeTracker1 = ({setAdded, Added, setModalVisible}) => {
       marginLeft: 5,
     },
   };
+  let employeeid = 0;
+  useEffect(() => {
+    const retrieveData = async () => {
+      try {
+        const storedResponse = await AsyncStorage.getItem('loginResponse');
+        if (storedResponse !== null) {
+          const loginResponse = JSON.parse(storedResponse);
+          employeeid = {employee_id: loginResponse[0].employee_id};
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
+    retrieveData();
+  }, []);
   let otime = 0;
   function Adding() {
     const startOfWeek = moment(selected).startOf('week').format('MMMDoYYYY');
     const endOfWeek = moment(selected).endOf('week').format('MMMDoYYYY');
     let dataa = Added;
-    {
-      working == ''
-        ? Alert.alert('please fill working details')
-        : currentValue == ''
-        ? Alert.alert('please fill Project details')
-        : intime == null
-        ? Alert.alert('please fill InTime details')
-        : outtime == null
-        ? Alert.alert('please fill OutTime details')
-        : (success = 1);
-      if (success == 1) {
-        dataa.push({
-          title: [startOfWeek + '-' + endOfWeek],
-          data: [
-            working,
-            currentValue,
-            intime,
-            outtime,
-            selected,
-            hh1 + ':' + mm2 + ':' + ss3,
-          ],
-        });
-      }
+    if (working === '') {
+      Alert.alert('please fill working details');
+    } else if (currentValue === '') {
+      Alert.alert('please fill Project details');
+    } else if (intime === null) {
+      Alert.alert('please fill InTime details');
+    } else if (outtime === null) {
+      Alert.alert('please fill OutTime details');
+    } else {
+      dataa.push({
+        title: [startOfWeek + '-' + endOfWeek],
+        data: [
+          working,
+          currentValue,
+          intime,
+          outtime,
+          selected,
+          hh1 + ':' + mm2 + ':' + ss3,
+        ],
+      });
+      const details = {
+        task_description: working,
+        project_id: 6113,
+        employee_id: employeeid,
+        task_start_time: intime.substring(0, 5),
+        task_end_time: outtime.substring(0, 5),
+        task_created_datetime: selected,
+      };
+      axios
+        .post(
+          'http://192.168.0.207:4178/api/timetracking/add/task/details/insert',
+          details,
+        )
+        .then(response => console.log(response.data.response))
+        .catch(error => console.log(error));
+
+      setModalVisible(false);
     }
 
     if (!working) {
@@ -579,9 +610,6 @@ const TimeTracker1 = ({setAdded, Added, setModalVisible}) => {
           <TouchableOpacity
             onPress={() => {
               Adding();
-              if (success == 1) {
-                setModalVisible(false);
-              }
             }}
             style={{
               backgroundColor: 'white',

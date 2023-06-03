@@ -3,6 +3,7 @@ import Dashboard from '../Screens/Dashboard';
 import Reports from '../Screens/Reports';
 import HolidaysList from '../Screens/HolidaysList';
 import CustomDrawer from './CustomDrawer';
+import Profile from '../Screens/Profile';
 import {DrawerContent, createDrawerNavigator} from '@react-navigation/drawer';
 import Home from '../Screens/Home';
 import BottomTabNavigator from './BottomTabNavigator';
@@ -13,9 +14,10 @@ import Icons from 'react-native-vector-icons/Ionicons';
 import Icons1 from 'react-native-vector-icons/MaterialIcons';
 import Icons2 from 'react-native-vector-icons/MaterialIcons';
 import Icons3 from 'react-native-vector-icons/MaterialIcons';
+import Icons4 from 'react-native-vector-icons/FontAwesome5';
 
 const Drawer = createDrawerNavigator();
-const DrawerNavigator = () => {
+const DrawerNavigator = props => {
   return (
     <Drawer.Navigator
       drawerContent={props => <CustomDrawer {...props} />}
@@ -31,7 +33,7 @@ const DrawerNavigator = () => {
         },
       }}>
       <Drawer.Screen
-        name="Homes"
+        name="Home"
         component={BottomTabNavigator}
         options={{
           drawerIcon: ({color}) => (
@@ -63,6 +65,15 @@ const DrawerNavigator = () => {
         options={{
           drawerIcon: ({color}) => (
             <Icons3 name="calendar-view-day" size={22} color={'white'} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          drawerIcon: ({color}) => (
+            <Icons4 name="user-circle" size={22} color={'white'} />
           ),
         }}
       />
