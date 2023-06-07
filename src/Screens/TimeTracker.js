@@ -14,6 +14,8 @@ import {
   FlatList,
 } from 'react-native';
 import moment from 'moment';
+import Icons2 from 'react-native-vector-icons/MaterialIcons';
+import Icons1 from 'react-native-vector-icons/Feather';
 import Dropdown from 'react-native-dropdown-picker';
 import Icons from 'react-native-vector-icons/AntDesign';
 import Iconss from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -24,6 +26,7 @@ import BackgroundTimer from 'react-native-background-timer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {useFocusEffect} from '@react-navigation/native';
+import SelectDropdown from 'react-native-select-dropdown';
 
 const TimeTracker = props => {
   const [workchild, setworkchild] = useState('');
@@ -50,6 +53,8 @@ const TimeTracker = props => {
   const [child, setchild] = useState();
   const [data, setdata] = useState([]);
   const [dt, setdt] = useState();
+  const [isdropdownopen, setisdropdownopen] = useState(false);
+
   const d = [];
   const d1 = [];
   const d2 = [];
@@ -284,30 +289,28 @@ const TimeTracker = props => {
   };
 
   const Items1 = [
-    {label: 'Apigee', value: 'dancing'},
-    {
-      label: 'BOB Finance Integration Platform',
-      value: 'bOB finance integration platform',
-    },
-    {label: 'Internal Attended', value: 'internal attended'},
-    {label: 'Burger King', value: 'burger king'},
-    {label: 'Catholic Syrian Bank', value: 'catholic syrian bank'},
-    {label: 'Certification', value: 'certification'},
-    {label: 'City Union Banknging', value: 'city union banknging'},
-    {label: 'Client Holiday', value: 'client holiday'},
-    {label: 'Desker', value: 'desker'},
-    {label: 'Desynova -Aspera - Hourly', value: 'desynova -aspera - hourly'},
-    {label: 'Digital Marketing', value: 'digital marketing'},
-    {label: 'Dream Housie', value: 'dream housie'},
-    {label: 'Euronet Sterling Gateway', value: 'euronet sterling gatewayv'},
-    {label: 'External Trainings', value: 'external trainings'},
-    {label: 'Hawq-i', value: 'Hawq-i'},
-    {label: 'Holiday', value: 'holiday'},
-    {label: 'Human Resource', value: 'human resource'},
-    {label: 'Indian Overseas bank', value: 'indian overseas bank'},
-    {label: 'Internal Meetings', value: 'internal meetings'},
-    {label: 'JANA Bank', value: 'jana Bank'},
-    {label: 'Karnataka Bank Ltd', value: 'karnataka Bank Ltd'},
+    'Apigee',
+    'BOB Finance Integration Platform',
+
+    'Internal Attended',
+    'Burger King',
+    'Catholic Syrian Bank',
+    'Certification',
+    'City Union Banknging',
+    'Client Holiday',
+    'Desker',
+    'Desynova -Aspera - Hourly',
+    'Digital Marketing',
+    'Dream Housie',
+    'Euronet Sterling Gateway',
+    'External Trainings',
+    'Hawq-i',
+    'Holiday',
+    'Human Resource',
+    'Indian Overseas bank',
+    'Internal Meetings',
+    'JANA Bank',
+    'Karnataka Bank Ltd',
   ];
   // const saveCurrentDateToLocalStorage=async(()=>{
   //   let currentDates=
@@ -450,7 +453,7 @@ const TimeTracker = props => {
 
         <View style={styles.dropdownContainer}>
           <View style={{zIndex: 1}}>
-            <Dropdown
+            {/* <Dropdown
               style={styles.dropdown}
               items={Items1}
               open={isopen}
@@ -463,6 +466,52 @@ const TimeTracker = props => {
               value={currentValuechild}
               placeholder="Project"
               placeholderStyle={{fontSize: 20}}
+            /> */}
+            <SelectDropdown
+              buttonStyle={{
+                borderWidth: 2,
+                borderColor: 'black',
+                borderRadius: 8,
+              }}
+              buttonTextAfterSelection={() =>
+                currentValuechild ? currentValuechild : 'Select Project . . .'
+              }
+              data={Items1}
+              onSelect={selectedItem => {
+                setCurrentValuechild(selectedItem);
+              }}
+              onFocus={() => {
+                setisdropdownopen(true);
+              }}
+              // showsVerticalScrollIndicator
+              // search
+              // searchInputStyle={{borderWidth: 2, borderRadius: 15, height: 45}}
+              // searchPlaceHolder="Search hear . . . "
+              renderDropdownIcon={() => (
+                <Icons2
+                  name={isdropdownopen ? 'expand-more' : 'expand-less'}
+                  size={20}
+                  color="black"
+                />
+              )}
+              // renderSearchInputLeftIcon={() => {
+              //   <Icons1
+              //     name="search"
+              //     size={70}
+              //     color="black"
+              //     alignItems="center"
+              //   />;
+              // }}
+              // buttonTextAfterSelection={(selectedItem, index) => {
+              //   // text represented after item is selected
+              //   // if data array is an array of objects then return selectedItem.property to render after item is selected
+              //   return selectedItem;
+              // }}
+              // rowTextForSelection={(item, index) => {
+              //   // text represented for each item in dropdown
+              //   // if data array is an array of objects then return item.property to represent item in dropdown
+              //   return item;
+              // }}
             />
           </View>
 
@@ -698,13 +747,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  dropdown: {
-    borderWidth: 2,
-    height: 50,
-    fontSize: 20,
-    borderRadius: 10,
-    width: 170,
-  },
+  dropdown: {},
   tag: {
     fontSize: 50,
     width: 100,

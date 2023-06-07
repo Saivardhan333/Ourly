@@ -17,6 +17,7 @@ import axios from 'axios';
 import {useNavigation} from '@react-navigation/native';
 import DateRangePickers from 'react-native-daterange-picker';
 import {ScrollView} from 'react-native-gesture-handler';
+import {StackedBarChart} from 'react-native-chart-kit';
 const Dashboard = () => {
   const navigation = useNavigation();
   const currentDates = moment();
@@ -173,12 +174,11 @@ const Dashboard = () => {
   // Calculate the middle dates
   const current = new Date(startweekdate);
   current.setDate(current.getDate() + 1); // Increment current date by 1
-
   while (current < endingweekdate) {
     middleDates.push(current.toISOString().slice(0, 10)); // Add current date to the array
     current.setDate(current.getDate() + 1); // Increment current date by 1
   }
-
+  // middleDates.push(endingweekdate.toISOString().slice(0, 10));
   // Include the end date
   // middleDates.push(endingweekdate.toISOString().slice(0, 10));
   // console.log(']]]]]]]]]]]]]', middleDates);
@@ -324,7 +324,7 @@ const Dashboard = () => {
               tag_id: 2,
               tag_name: 'External',
               total_time: '03:10:00',
-              task_created_datetime: '2023-05-29',
+              task_created_datetime: '2023-06-05',
             },
             {
               project_name: 'Desker',
@@ -335,7 +335,7 @@ const Dashboard = () => {
               tag_id: 2,
               tag_name: 'External',
               total_time: '08:30:00',
-              task_created_datetime: '2023-05-31',
+              task_created_datetime: '2023-06-06',
             },
           ],
         },
@@ -351,7 +351,7 @@ const Dashboard = () => {
               tag_id: 1,
               tag_name: 'Internal',
               total_time: '03:10:00',
-              task_created_datetime: '2023-05-30',
+              task_created_datetime: '2023-06-06',
             },
             {
               project_name: 'Ourly',
@@ -362,7 +362,61 @@ const Dashboard = () => {
               tag_id: 1,
               tag_name: 'Internal',
               total_time: '01:00:00',
-              task_created_datetime: '2023-05-29',
+              task_created_datetime: '2023-06-05',
+            },
+          ],
+        },
+        {
+          project_name: 'Burger King',
+          value: [
+            {
+              project_name: 'Desker',
+              project_color_code: 'red',
+              project_code: 'DESCON01EXT',
+              client_id: 12,
+              client_name: 'Grene',
+              tag_id: 2,
+              tag_name: 'External',
+              total_time: '03:10:00',
+              task_created_datetime: '2023-06-07',
+            },
+            {
+              project_name: 'Desker',
+              project_color_code: 'red',
+              project_code: 'DESCON01EXT',
+              client_id: 12,
+              client_name: 'Grene',
+              tag_id: 2,
+              tag_name: 'External',
+              total_time: '08:30:00',
+              task_created_datetime: '2023-06-05',
+            },
+          ],
+        },
+        {
+          project_name: 'Apigee',
+          value: [
+            {
+              project_name: 'Apigee',
+              project_color_code: 'green',
+              project_code: 'DESCON01EXT',
+              client_id: 12,
+              client_name: 'Grene',
+              tag_id: 2,
+              tag_name: 'External',
+              total_time: '03:10:00',
+              task_created_datetime: '2023-06-05',
+            },
+            {
+              project_name: 'Apigee',
+              project_color_code: 'green',
+              project_code: 'DESCON01EXT',
+              client_id: 12,
+              client_name: 'Grene',
+              tag_id: 2,
+              tag_name: 'External',
+              total_time: '08:30:00',
+              task_created_datetime: '2023-06-06',
             },
           ],
         },
@@ -407,6 +461,12 @@ const Dashboard = () => {
       ],
     ],
   };
+  // const pieData = [
+  //   {value: 70, color: '#d63384'},
+  //   {value: 10, color: '#fff'},
+  //   {value: 10, color: 'black'},
+  //   {value: 10, color: 'red'},
+  // ];
   // const stackDataa = [];
   // for (let j = 0; j < graphdata.response[1].length; j++) {
   //   const valueArray = graphdata.response[1][j].value;
@@ -430,7 +490,7 @@ const Dashboard = () => {
   //     }
   //   }
   // }
-
+  const pieDataa = [];
   const ssArray = middleDates.map((val, index, arr) =>
     datafun(val, index, arr),
   );
@@ -454,12 +514,20 @@ const Dashboard = () => {
         const decimalHours = hours + minutes / 60 + seconds / 3600;
         const formattedHours = decimalHours.toFixed(1);
         stackObj = {
-          value: formattedHours,
+          value: parseFloat(formattedHours),
           color: item.project_color_code,
         };
-        if (item.task_created_datetime === data) {
-          stacks.push(stackObj);
-        }
+        sObj = {
+          value: parseFloat(formattedHours),
+          color: item.project_color_code,
+        };
+        // console.log(item.task_created_datetime + '===' + data);
+        // console.log(data);
+        //if (item.task_created_datetime === data) {
+        stacks.push(stackObj);
+        pieDataa.push(sObj);
+        //}
+        // else if(){}
       });
     });
 
@@ -467,7 +535,7 @@ const Dashboard = () => {
     if (stacks.length === 0) {
       const sObj = {
         value: 0,
-        color: 'rgb(211, 241, 25)',
+        color: null,
       };
       stacks.push(sObj);
     }
@@ -478,60 +546,11 @@ const Dashboard = () => {
     };
   }
 
-  const cc = ssArray.flat();
-  cc.map(val => console.log(cc));
+  // // const cc = ssArray.flat();
+  // console.log(ssArray[0].stacks);
+  // console.log(pieDataa);
+  // console.log('>>>>>>>>>>>>>>>>' + stackData.map(val => typeof val));
 
-  const stackData = [
-    {
-      stacks: [
-        {value: 1, color: 'orange'},
-        {value: 1, color: '#4ABFF4'},
-      ],
-      label: middleDates[0],
-    },
-    {
-      stacks: [
-        {value: 10, color: 'orange'},
-        {value: 20, color: '#4ABFF4'},
-      ],
-      label: middleDates[1],
-    },
-    {
-      stacks: [
-        {value: 10.5, color: 'orange'},
-        {value: 20, color: '#4ABFF4'},
-      ],
-      label: middleDates[2],
-    },
-    {
-      stacks: [
-        {value: 10, color: 'orange'},
-        {value: 20, color: '#4ABFF4'},
-      ],
-      label: middleDates[3],
-    },
-    {
-      stacks: [
-        {value: 10, color: 'orange'},
-        {value: 20, color: '#4ABFF4'},
-      ],
-      label: middleDates[4],
-    },
-    {
-      stacks: [
-        {value: 10, color: 'orange'},
-        {value: 20, color: '#4ABFF4'},
-      ],
-      label: middleDates[5],
-    },
-    {
-      stacks: [
-        {value: 10, color: 'orange'},
-        {value: 20, color: '#4ABFF4'},
-      ],
-      label: middleDates[6],
-    },
-  ];
   // stackData.map(val => if(val.label==)),
 
   //.map(val => val.value.map(val1 => val1.client_id))
@@ -578,8 +597,30 @@ const Dashboard = () => {
   //   .then(response =>
   //     console.log('====================>', response.data.response),
   //   )
-  //   .catch(error => console.log('llllllll', error));
-
+  //.catch(error => console.log('llllllll', error));
+  // const data = {
+  //   labels: ['Test1', 'Test2', 'Test3', 'Test4', 'Test5', 'Test6'],
+  //   legend: ['L1', 'L2', 'L3', 'l4'],
+  //   data: [
+  //     [60, 60, 60],
+  //     [30, 30, 60],
+  //     [20, 60, 60],
+  //     [10, 30, 60],
+  //     [60, 60, 60],
+  //     [5, 30, 60],
+  //   ],
+  //   barColors: ['yellow', 'blue', '#a4b0be'],
+  // };
+  // const chartConfig = {
+  //   backgroundGradientFrom: '#1E2923',
+  //   backgroundGradientFromOpacity: 0,
+  //   backgroundGradientTo: '#08130D',
+  //   backgroundGradientToOpacity: 0.5,
+  //   color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+  //   strokeWidth: 2, // optional, default 3
+  //   barPercentage: 0.5,
+  //   useShadowColorFromDataset: false, // optional
+  // };
   return (
     <>
       <View style={styles.drawerHeader}>
@@ -689,14 +730,23 @@ const Dashboard = () => {
               justifyContent: 'center',
               margin: 15,
             }}>
-            <BarChart
-              width={300}
+            <BarChart width={330} spacing={74} stackData={ssArray} />
+            {/* <StackedBarChart
+              data={data}
+              width={370}
               height={220}
-              spacing={74}
-              noOfSections={4}
-              stackData={!cc ? cc : stackData}
-              isAnimated
-            />
+              const
+              chartConfig={{
+                backgroundGradientFrom: '#fff',
+                backgroundGradientFromOpacity: 0,
+                backgroundGradientTo: 'red',
+                backgroundGradientToOpacity: 0.5,
+                color: (opacity = 1) => `rgba(50, 255, 146, ${opacity})`,
+                strokeWidth: 5, // optional, default 3
+                barPercentage: 0.8,
+                useShadowColorFromDataset: false, // optional
+              }}
+            /> */}
           </View>
           <View
             style={{
@@ -705,10 +755,14 @@ const Dashboard = () => {
             <PieChart
               donut
               innerRadius={50}
-              data={pieData}
+              data={pieDataa}
               radius={80}
               centerLabelComponent={() => {
-                return <Text style={{fontSize: 30}}>70%</Text>;
+                return (
+                  <Text style={{fontSize: 30}}>
+                    {graphdata.response[0].total_time.slice(0, 5)}
+                  </Text>
+                );
               }}
             />
           </View>

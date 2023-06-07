@@ -312,8 +312,8 @@
                             "tag_id": 1,
                             "tag_name": "Internal",
                             "employee_id": 6281,
-                            "task_start_time": "10:32:00",
-                            "task_end_time": "12:10:00",
+                            "task_start_time": "09:32:00",
+                            "task_end_time": "13:10:00",
                             "task_total_time": "03:38:00",
                             "task_created_datetime": "2023-05-02"
                         }
@@ -378,8 +378,8 @@
                             "tag_id": 1,
                             "tag_name": "Internal",
                             "employee_id": 6281,
-                            "task_start_time": "10:30:00",
-                            "task_end_time": "12:10:00",
+                            "task_start_time": "09:30:00",
+                            "task_end_time": "13:10:00",
                             "task_total_time": "03:40:00",
                             "task_created_datetime": "2023-05-01"
                         }
@@ -422,13 +422,311 @@
                             "task_end_time": "19:16:00",
                             "task_total_time": "01:16:00",
                             "task_created_datetime": "2023-04-28"
+                        },
+                        {
+                            "date": "Fri, Apr 28th 2023",
+                            "task_parent_id": 8115,
+                            "task_child_id": 11623,
+                            "task_description": "Working On Ourly Mobile App ",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "14:00:00",
+                            "task_end_time": "17:30:00",
+                            "task_total_time": "03:30:00",
+                            "task_created_datetime": "2023-04-28"
+                        },
+                        {
+                            "date": "Fri, Apr 28th 2023",
+                            "task_parent_id": 8115,
+                            "task_child_id": 11620,
+                            "task_description": "Working On Ourly Mobile App ",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "09:30:00",
+                            "task_end_time": "13:10:00",
+                            "task_total_time": "03:40:00",
+                            "task_created_datetime": "2023-04-28"
+                        }
+                    ]
+                },
+                {
+                    "header": {
+                        "month": " Apr 27th 2023",
+                        "day": "Thu",
+                        "hours": "08:40:00"
+                    },
+                    "child": [
+                        {
+                            "date": "Thu, Apr 27th 2023",
+                            "task_parent_id": 867,
+                            "task_child_id": 11617,
+                            "task_description": "Working On Ourly Mobile App ",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "18:00:00",
+                            "task_end_time": "19:30:00",
+                            "task_total_time": "01:30:00",
+                            "task_created_datetime": "2023-04-27"
+                        },
+                        {
+                            "date": "Thu, Apr 27th 2023",
+                            "task_parent_id": 867,
+                            "task_child_id": 11616,
+                            "task_description": "Working On Ourly Mobile App ",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "14:00:00",
+                            "task_end_time": "17:30:00",
+                            "task_total_time": "03:30:00",
+                            "task_created_datetime": "2023-04-27"
+                        },
+                        {
+                            "date": "Thu, Apr 27th 2023",
+                            "task_parent_id": 867,
+                            "task_child_id": 11614,
+                            "task_description": "Working On Ourly Mobile App ",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "09:30:00",
+                            "task_end_time": "13:10:00",
+                            "task_total_time": "03:40:00",
+                            "task_created_datetime": "2023-04-27"
+                        }
+                    ]
+                },
+                {
+                    "header": {
+                        "month": " Apr 26th 2023",
+                        "day": "Wed",
+                        "hours": "08:35:00"
+                    },
+                    "child": [
+                        {
+                            "date": "Wed, Apr 26th 2023",
+                            "task_parent_id": 998,
+                            "task_child_id": 11323,
+                            "task_description": "Working on ourly time tracker",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "18:10:00",
+                            "task_end_time": "19:45:00",
+                            "task_total_time": "01:35:00",
+                            "task_created_datetime": "2023-04-26"
+                        },
+                        {
+                            "date": "Wed, Apr 26th 2023",
+                            "task_parent_id": 998,
+                            "task_child_id": 11322,
+                            "task_description": "Working on ourly time tracker",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "14:00:00",
+                            "task_end_time": "17:30:00",
+                            "task_total_time": "03:30:00",
+                            "task_created_datetime": "2023-04-26"
+                        },
+                        {
+                            "date": "Wed, Apr 26th 2023",
+                            "task_parent_id": 998,
+                            "task_child_id": 11321,
+                            "task_description": "Working on ourly time tracker",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "09:30:00",
+                            "task_end_time": "13:00:00",
+                            "task_total_time": "03:30:00",
+                            "task_created_datetime": "2023-04-26"
+                        }
+                    ]
+                },
+                {
+                    "header": {
+                        "month": " Apr 25th 2023",
+                        "day": "Tue",
+                        "hours": "09:00:00"
+                    },
+                    "child": [
+                        {
+                            "date": "Tue, Apr 25th 2023",
+                            "task_parent_id": 7624,
+                            "task_child_id": 11320,
+                            "task_description": "Working on ourly time tracker",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "18:00:00",
+                            "task_end_time": "20:00:00",
+                            "task_total_time": "02:00:00",
+                            "task_created_datetime": "2023-04-25"
+                        },
+                        {
+                            "date": "Tue, Apr 25th 2023",
+                            "task_parent_id": 7624,
+                            "task_child_id": 11319,
+                            "task_description": "Working on ourly time tracker",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "14:00:00",
+                            "task_end_time": "17:30:00",
+                            "task_total_time": "03:30:00",
+                            "task_created_datetime": "2023-04-25"
+                        },
+                        {
+                            "date": "Tue, Apr 25th 2023",
+                            "task_parent_id": 7624,
+                            "task_child_id": 11318,
+                            "task_description": "Working on ourly time tracker",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "09:30:00",
+                            "task_end_time": "13:00:00",
+                            "task_total_time": "03:30:00",
+                            "task_created_datetime": "2023-04-25"
+                        }
+                    ]
+                },
+                {
+                    "header": {
+                        "month": " Apr 24th 2023",
+                        "day": "Mon",
+                        "hours": "09:33:00"
+                    },
+                    "child": [
+                        {
+                            "date": "Mon, Apr 24th 2023",
+                            "task_parent_id": 664,
+                            "task_child_id": 11114,
+                            "task_description": "Working on Login validations",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "18:00:00",
+                            "task_end_time": "20:20:00",
+                            "task_total_time": "02:20:00",
+                            "task_created_datetime": "2023-04-24"
+                        },
+                        {
+                            "date": "Mon, Apr 24th 2023",
+                            "task_parent_id": 664,
+                            "task_child_id": 11112,
+                            "task_description": "Working on Login validations",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "14:00:00",
+                            "task_end_time": "17:35:00",
+                            "task_total_time": "03:35:00",
+                            "task_created_datetime": "2023-04-24"
+                        },
+                        {
+                            "date": "Mon, Apr 24th 2023",
+                            "task_parent_id": 664,
+                            "task_child_id": 11107,
+                            "task_description": " Working on login validations",
+                            "project_id": 5771,
+                            "project_name": "Internal Attended Training",
+                            "project_code": "IATPRJ01INT",
+                            "project_color_code": "rgb(217, 26, 118)",
+                            "client_id": 17,
+                            "client_name": "Pronteff",
+                            "tag_id": 1,
+                            "tag_name": "Internal",
+                            "employee_id": 6281,
+                            "task_start_time": "09:32:00",
+                            "task_end_time": "13:10:00",
+                            "task_total_time": "03:38:00",
+                            "task_created_datetime": "2023-04-24"
                         }
                     ]
                 }
-                
-              
-                
-                
             ]
         }
     ]

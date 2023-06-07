@@ -28,6 +28,8 @@ import {Stopwatch, Timer} from 'react-native-stopwatch-timer';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {black} from 'react-native-paper/lib/typescript/src/styles/themes/v2/colors';
 import {scrollTo} from 'react-native-reanimated';
+import SelectDropdown from 'react-native-select-dropdown';
+import Icons2 from 'react-native-vector-icons/MaterialIcons';
 LocaleConfig.locales['fr'] = {
   monthNames: [
     'January',
@@ -113,20 +115,45 @@ const TimeTracker1 = ({setAdded, Added, setModalVisible}) => {
   const [hh1, sethh1] = useState('00');
   const [mm2, setmm2] = useState('00');
   const [ss3, setss3] = useState('00');
+  const [dropdownopen, setdropdownopen] = useState(false);
   //const [hour, sethou] = useState(0);
   //const [minu, setmin] = useState(0);
   //const [totalDuration, setTotalDuration] = useState(90000);
   //const [startenddate, setstartenddate] = useState('');
   // const currentTime = useRef('');
 
-  const Items = [
-    {label: 'Dancing', value: 'dancing'},
-    {label: 'Playing', value: 'playing'},
-    {label: 'Internal Attended', value: 'Internal Attended'},
-    {label: 'Runing', value: 'Runing'},
-    {label: 'roming', value: 'roming'},
-    {label: 'romeo', value: 'romeo'},
-    {label: 'Singing', value: 'singing'},
+  // const Items = [
+  //   {label: 'Dancing', value: 'dancing'},
+  //   {label: 'Playing', value: 'playing'},
+  //   {label: 'Internal Attended', value: 'Internal Attended'},
+  //   {label: 'Runing', value: 'Runing'},
+  //   {label: 'roming', value: 'roming'},
+  //   {label: 'romeo', value: 'romeo'},
+  //   {label: 'Singing', value: 'singing'},
+  // ];
+  const Items1 = [
+    'Apigee',
+    'BOB Finance Integration Platform',
+
+    'Internal Attended',
+    'Burger King',
+    'Catholic Syrian Bank',
+    'Certification',
+    'City Union Banknging',
+    'Client Holiday',
+    'Desker',
+    'Desynova -Aspera - Hourly',
+    'Digital Marketing',
+    'Dream Housie',
+    'Euronet Sterling Gateway',
+    'External Trainings',
+    'Hawq-i',
+    'Holiday',
+    'Human Resource',
+    'Indian Overseas bank',
+    'Internal Meetings',
+    'JANA Bank',
+    'Karnataka Bank Ltd',
   ];
   // const toggleTimer = () => {
   //   setTimerStart(!timerStart);
@@ -291,7 +318,7 @@ const TimeTracker1 = ({setAdded, Added, setModalVisible}) => {
         />
         <View style={styles.dropdownContainer}>
           <View style={{zIndex: 1}}>
-            <Dropdown
+            {/* <Dropdown
               style={styles.dropdown}
               items={Items}
               open={isopen}
@@ -304,6 +331,52 @@ const TimeTracker1 = ({setAdded, Added, setModalVisible}) => {
               value={currentValue}
               placeholder="Project"
               placeholderStyle={{fontSize: 20}}
+            /> */}
+            <SelectDropdown
+              buttonStyle={{
+                borderWidth: 2,
+                borderColor: 'black',
+                borderRadius: 8,
+              }}
+              buttonTextAfterSelection={() =>
+                currentValue ? currentValue : 'Select Project . . .'
+              }
+              data={Items1}
+              onSelect={selectedItem => {
+                setCurrentValue(selectedItem);
+              }}
+              onFocus={() => {
+                setdropdownopen(true);
+              }}
+              // showsVerticalScrollIndicator
+              // search
+              // searchInputStyle={{borderWidth: 2, borderRadius: 15, height: 45}}
+              // searchPlaceHolder="Search hear . . . "
+              renderDropdownIcon={() => (
+                <Icons2
+                  name={dropdownopen ? 'expand-more' : 'expand-less'}
+                  size={20}
+                  color="black"
+                />
+              )}
+              // renderSearchInputLeftIcon={() => {
+              //   <Icons1
+              //     name="search"
+              //     size={70}
+              //     color="black"
+              //     alignItems="center"
+              //   />;
+              // }}
+              // buttonTextAfterSelection={(selectedItem, index) => {
+              //   // text represented after item is selected
+              //   // if data array is an array of objects then return selectedItem.property to render after item is selected
+              //   return selectedItem;
+              // }}
+              // rowTextForSelection={(item, index) => {
+              //   // text represented for each item in dropdown
+              //   // if data array is an array of objects then return item.property to represent item in dropdown
+              //   return item;
+              // }}
             />
           </View>
 
