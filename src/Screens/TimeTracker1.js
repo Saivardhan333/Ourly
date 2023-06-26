@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import moment from 'moment';
 import axios from 'axios';
+import {baseurl} from '../utils/urls';
 import CustomNavbar from '../Components/CustomNavbar';
 import {
   TextInput,
@@ -30,6 +31,7 @@ import {black} from 'react-native-paper/lib/typescript/src/styles/themes/v2/colo
 import {scrollTo} from 'react-native-reanimated';
 import SelectDropdown from 'react-native-select-dropdown';
 import Icons2 from 'react-native-vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 LocaleConfig.locales['fr'] = {
   monthNames: [
     'January',
@@ -102,7 +104,7 @@ const TimeTracker1 = ({setAdded, Added, setModalVisible}) => {
   const currentDate = new Date();
   const formatedDate = moment(currentDate).format('YYYY-MM-DD');
   const [selected, setSelected] = useState(formatedDate);
-
+  let [employee_id, setemployee_Id] = useState();
   const [showCalendar, setShowCalendar] = useState(false);
   // const [timerStart, setTimerStart] = useState(false);
   // const [stopwatchStart, setStopwatchStart] = useState(false);
@@ -197,14 +199,16 @@ const TimeTracker1 = ({setAdded, Added, setModalVisible}) => {
       marginLeft: 5,
     },
   };
-  let employeeid = 0;
+
   useEffect(() => {
     const retrieveData = async () => {
       try {
         const storedResponse = await AsyncStorage.getItem('loginResponse');
         if (storedResponse !== null) {
-          const loginResponse = JSON.parse(storedResponse);
-          employeeid = {employee_id: loginResponse[0].employee_id};
+          let loginResponse = JSON.parse(storedResponse);
+
+          employee_id = loginResponse[0].employee_id;
+          setemployee_Id(employee_id);
         }
       } catch (error) {
         console.log(error);
@@ -215,6 +219,9 @@ const TimeTracker1 = ({setAdded, Added, setModalVisible}) => {
   }, []);
   let otime = 0;
   function Adding() {
+    console.log(
+      'hellowwwwwww................................???????????????????',
+    );
     const startOfWeek = moment(selected).startOf('week').format('MMMDoYYYY');
     const endOfWeek = moment(selected).endOf('week').format('MMMDoYYYY');
     let dataa = Added;
@@ -238,20 +245,19 @@ const TimeTracker1 = ({setAdded, Added, setModalVisible}) => {
           hh1 + ':' + mm2 + ':' + ss3,
         ],
       });
+
       const details = {
         task_description: working,
-        project_id: 6113,
-        employee_id: employeeid,
+        project_id: 7630,
+        employee_id: employee_id,
         task_start_time: intime.substring(0, 5),
         task_end_time: outtime.substring(0, 5),
         task_created_datetime: selected,
       };
+      console.log(details);
       axios
-        .post(
-          'http://192.168.0.207:4178/api/timetracking/add/task/details/insert',
-          details,
-        )
-        .then(response => console.log(response.data.response))
+        .post(`${baseurl}/api/timetracking/add/task/details/insert`, details)
+        .then(response => console.log('=======>', response.data.response))
         .catch(error => console.log(error));
 
       setModalVisible(false);
@@ -264,7 +270,6 @@ const TimeTracker1 = ({setAdded, Added, setModalVisible}) => {
     } else if (!intime) {
       setintime('');
     } else if (outtime) {
-      console.log('gagaggagagagag', outtime);
       setouttime('');
       setAdded(dataa);
     }

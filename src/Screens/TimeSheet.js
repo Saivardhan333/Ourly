@@ -12,6 +12,8 @@ import DateRangePickers from 'react-native-daterange-picker';
 import moment from 'moment';
 import Icons from 'react-native-vector-icons/AntDesign';
 import axios from 'axios';
+import Icon from 'react-native-vector-icons/Ionicons';
+import {baseurl} from '../utils/urls';
 
 const TimeSheet = () => {
   const [project, setproject] = useState([]);
@@ -24,7 +26,7 @@ const TimeSheet = () => {
   let abc = {
     first_week_day: startofweek,
     last_week_day: endofweek,
-    employee_id: 982,
+    employee_id: 9968,
   };
   const retrieveData = async () => {
     try {
@@ -44,10 +46,7 @@ const TimeSheet = () => {
     setsubmit(!submit);
     if (submit) {
       axios
-        .post(
-          'http://192.168.0.207:4178/api/approvals/on/submit/for/approval',
-          abc,
-        )
+        .post(`${baseurl}/api/approvals/on/submit/for/approval`, abc)
         .then(response => {
           if (response.data.status === 200) {
             console.log('success');
@@ -64,7 +63,7 @@ const TimeSheet = () => {
     } else {
       console.log('withdraw');
       axios
-        .post('http://192.168.0.207:4178/api/timesheet/on/withdraw', abc)
+        .post(`${baseurl}/api/timesheet/on/withdraw`, abc)
         .then(response => response);
     }
   }
@@ -74,10 +73,7 @@ const TimeSheet = () => {
     retrieveData;
     setLoading(true);
     axios
-      .post(
-        'http://192.168.0.207:4178/api/timesheet/get/projects/overview/each/week',
-        abc,
-      )
+      .post(`${baseurl}/api/timesheet/get/projects/overview/each/week`, abc)
       .then(response => {
         //setProjectData(response.data);
         const updatedProject = response.data.response.map(val => ({
@@ -201,6 +197,17 @@ const TimeSheet = () => {
 
   return (
     <>
+      <View style={styles.drawerHeader}>
+        <View style={{flex: 2, alignItems: 'center'}}>
+          <TouchableOpacity onPress={() => navigation.openDrawer()}>
+            <Icon name="menu" size={30} style={{}} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.headerTitle}>
+          <Text style={{fontSize: 25, fontWeight: 'bold'}}>Time Sheet</Text>
+        </View>
+        <Text style={styles.headerRight}></Text>
+      </View>
       <View style={styles.screen}>
         <DateRangePickers
           onChange={val => {
@@ -401,6 +408,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     zIndex: 1,
+  },
+  drawerHeader: {
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 15,
+  },
+  headerTitle: {
+    flex: 6,
+    // paddingLeft: 60,
+    alignItems: 'center',
+  },
+  headerRight: {
+    flex: 2,
   },
 });
 export default TimeSheet;

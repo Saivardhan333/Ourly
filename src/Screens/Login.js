@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Text,
   Image,
@@ -12,12 +12,13 @@ import {
   Keyboard,
   Alert,
 } from 'react-native';
+// import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DrawerNavigators from '../Components/DrawerNavigators';
-import Homes from './Homes';
 import axios from 'axios';
 import TimeTracker from './TimeTracker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {baseurl} from '../utils/urls';
 
 const Login = ({navigation}) => {
   const [modal, setmodal] = useState(false);
@@ -35,17 +36,16 @@ const Login = ({navigation}) => {
     if (checkValidEmail) {
       Alert.alert('Please enter a valid email address.');
     } else if (!passwordvalidity) {
-      console.log(body);
-      navigation.navigate(Homes);
+      //navigation.navigate(Homes);
       axios
-        .post('http://192.168.0.207:4178/api/user/login/insert', body)
+        .post(`${baseurl}/api/user/login/insert`, body)
         .then(response => {
-          const loginResponse = response?.data?.response;
-          console.log('login data', loginResponse);
+          let loginResponse = response?.data?.response;
+
           // Store loginResponse in AsyncStorage
           AsyncStorage.setItem('loginResponse', JSON.stringify(loginResponse))
             .then(() => {
-              console.log('loginResponse stored in AsyncStorage.');
+              console.log('loginResponse stored in AsyncStorage..........');
             })
             .catch(error => {
               console.log(
@@ -53,7 +53,11 @@ const Login = ({navigation}) => {
                 error,
               );
             });
-          navigation.navigate(Homes);
+
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'Homes'}],
+          });
         })
         .catch(error => {
           console.log('Something caused an error', error);
@@ -119,7 +123,7 @@ const Login = ({navigation}) => {
   function sendEmail() {
     const gg = {email: forgotemail};
     axios
-      .post('http://192.168.0.207:4178/api/user/send/forget/password/link', gg)
+      .post(`${baseurl}/api/user/send/forget/password/link`, gg)
       .then(response => console.log(response.data.response))
       .catch(error => console.log(error));
   }

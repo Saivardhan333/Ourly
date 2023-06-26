@@ -10,10 +10,12 @@ import {
   Modal,
   SectionList,
   Alert,
+  ActivityIndicator,
   AppState,
   FlatList,
 } from 'react-native';
 import moment from 'moment';
+import {baseurl} from '../utils/urls';
 import Icons2 from 'react-native-vector-icons/MaterialIcons';
 import Icons1 from 'react-native-vector-icons/Feather';
 import Dropdown from 'react-native-dropdown-picker';
@@ -25,11 +27,15 @@ import TimeTracker1 from './TimeTracker1';
 import BackgroundTimer from 'react-native-background-timer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import Icon from 'react-native-vector-icons/Ionicons';
 import {useFocusEffect} from '@react-navigation/native';
 import SelectDropdown from 'react-native-select-dropdown';
+import {useNavigation} from '@react-navigation/native';
 
 const TimeTracker = props => {
+  const navigation = useNavigation();
   const [workchild, setworkchild] = useState('');
+  const [loading, setLoading] = useState(true);
   const [Added, setAdded] = useState([]);
   const [Added1, setAdded1] = useState([]);
   const [isopen, setisopen] = useState(false);
@@ -54,32 +60,39 @@ const TimeTracker = props => {
   const [data, setdata] = useState([]);
   const [dt, setdt] = useState();
   const [isdropdownopen, setisdropdownopen] = useState(false);
-
+  let [employee_id, setemployee_Id] = useState();
+  const [renderData, setRenderData] = useState(false);
   const d = [];
   const d1 = [];
   const d2 = [];
-  let employeeid = 0;
+  let stopwatchTime = 0;
   useEffect(() => {
-    const retrieveData = async () => {
-      try {
-        const storedResponse = await AsyncStorage.getItem('loginResponse');
-        if (storedResponse !== null) {
-          const loginResponse = JSON.parse(storedResponse);
-          employeeid = {employee_id: loginResponse[0].employee_id};
-          const response = await axios.post(
-            'http://192.168.0.207:4178/api/timetracking/get/all/weeks/task/details/by/employeeid/list',
-            employeeid,
-          );
-          const resdata = response.data.response.map(val => val);
-          setdata(resdata);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
     retrieveData();
-  }, []);
+  }, [modalVisible, renderData]);
+
+  const retrieveData = async () => {
+    try {
+      setLoading(true);
+      const storedResponse = await AsyncStorage.getItem('loginResponse');
+      if (storedResponse !== null) {
+        let loginResponse = JSON.parse(storedResponse);
+        employee_id = {employee_id: loginResponse[0].employee_id};
+        const response = await axios.post(
+          `${baseurl}/api/timetracking/get/all/weeks/task/details/by/employeeid/list`,
+          employee_id,
+        );
+
+        const resdata = response.data.response.map(val => val);
+        setemployee_Id(loginResponse[0].employee_id);
+        // console.log('=========>', resdata);
+        setdata(resdata);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
 
   let timetime = '';
   useEffect(() => {
@@ -134,48 +147,48 @@ const TimeTracker = props => {
 
     retrieveStartTime();
   }, []);
+  // useEffect(() => {
+  //   data.forEach(val => {
+  //     val.forEach(vall => {
+  //       d2.push({
+  //         startDate: vall.isApp.startDate + '-' + vall.isApp.endDate,
+  //         status: vall.isApp.status !== 'SUBMIT' ? vall.isApp.status : '',
+  //         weekHour: vall.isApp.weekHour,
+  //       });
+  //     });
+  //   });
 
-  data.forEach(val => {
-    val.forEach(vall => {
-      d2.push({
-        startDate: vall.isApp.startDate + '-' + vall.isApp.endDate,
-        status: vall.isApp.status !== 'SUBMIT' ? vall.isApp.status : '',
-        weekHour: vall.isApp.weekHour,
-      });
-    });
-  });
+  //   data.forEach(val => {
+  //     val.forEach(val => {
+  //       val.head.forEach(val => {
+  //         d1.push({
+  //           header: val.header.day + ',' + val.header.month,
+  //           hours: val.header.hours,
+  //         });
+  //       });
+  //     });
+  //   });
 
-  data.forEach(val => {
-    val.forEach(val => {
-      val.head.forEach(val => {
-        d1.push({
-          header: val.header.day + ',' + val.header.month,
-          hours: val.header.hours,
-        });
-      });
-    });
-  });
-
-  data.forEach(val => {
-    val.forEach(val => {
-      val.head.forEach(val => {
-        val.child.forEach(val => {
-          d.push({
-            task_description: val.task_description,
-            project_name: val.project_name,
-            tag_name: val.tag_name,
-            task_start_time: val.task_start_time,
-            task_end_time: val.task_end_time,
-            task_created_datetime: val.task_created_datetime,
-            task_total_time: val.task_total_time,
-            date: val.date,
-            task_child_id: val.task_child_id,
-          });
-        });
-      });
-    });
-  });
-
+  //   data.forEach(val => {
+  //     val.forEach(val => {
+  //       val.head.forEach(val => {
+  //         val.child.forEach(val => {
+  //           d.push({
+  //             task_description: val.task_description,
+  //             project_name: val.project_name,
+  //             tag_name: val.tag_name,
+  //             task_start_time: val.task_start_time,
+  //             task_end_time: val.task_end_time,
+  //             task_created_datetime: val.task_created_datetime,
+  //             task_total_time: val.task_total_time,
+  //             date: val.date,
+  //             task_child_id: val.task_child_id,
+  //           });
+  //         });
+  //       });
+  //     });
+  //   });
+  // }, [modalVisible, renderData]);
   // useFocusEffect(
   //   React.useCallback(() => {
   //     retrieveData();
@@ -236,24 +249,28 @@ const TimeTracker = props => {
       setIsRunning(true);
     } else {
       if (workchild && currentValuechild) {
-        const details = {
+        let details = {
           task_description: workchild,
-          project_id: 6113,
-          employee_id: employeeid,
+          project_id: 7630,
+          employee_id: employee_id,
           task_start_time: currentTime.substring(0, 5),
           task_end_time: formattedTime.substring(0, 5),
           task_created_datetime: currentDate,
         };
-
+        console.log(details);
         axios
-          .post(
-            'http://192.168.0.207:4178/api/timetracking/add/task/details/insert',
-            details,
+          .post(`${baseurl}/api/timetracking/add/task/details/insert`, details)
+          .then(
+            response => console.log('------------->', response.data.response),
+            setRenderData(true),
           )
-          .then(response => response.data.response)
           .catch(error => console.log(error));
 
-        const stopwatchTime = `${nhours}:${nminutes}:${nseconds}`;
+        stopwatchTime =
+          `${nhours}` < 10 && `${nminutes}` < 10 && `${nseconds}` < 10
+            ? `0${nhours}:0${nminutes}:0${nseconds}`
+            : `${nhours}:${nminutes}:${nseconds}`;
+        console.log('>>>>>>>>>>>>>>>>>>', stopwatchTime);
         setStopwatchTime(stopwatchTime);
         setIsRunning(false);
         setSeconds(0);
@@ -364,7 +381,8 @@ const TimeTracker = props => {
     setworkchild('');
     setCurrentValuechild('');
   }
-  const renderItem = () =>
+
+  let renderItem = () =>
     data.map(val =>
       val.map(val1 => (
         <>
@@ -438,8 +456,23 @@ const TimeTracker = props => {
         </>
       )),
     );
+  useEffect(() => {
+    renderItem();
+    setRenderData(false);
+  }, [modalVisible, renderData]);
   return (
     <View style={styles.container}>
+      <View style={styles.drawerHeader}>
+        <View style={{flex: 2, alignItems: 'center'}}>
+          <TouchableOpacity onPress={() => navigation.openDrawer()}>
+            <Icon name="menu" size={30} style={{}} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.headerTitle}>
+          <Text style={{fontSize: 25, fontWeight: 'bold'}}>TimeTracker</Text>
+        </View>
+        <Text style={styles.headerRight}></Text>
+      </View>
       <View style={{flex: 3}}>
         <TextInput
           style={styles.Textinput}
@@ -636,8 +669,16 @@ const TimeTracker = props => {
             )}
           />
         ) : null} */}
-
-        {data ? (
+        {loading ? (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <ActivityIndicator size="large" color="Black" />
+          </View>
+        ) : data ? (
           <FlatList
             data={[null]}
             keyExtractor={() => 'key'}
@@ -731,6 +772,23 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 5,
   },
+  drawerHeader: {
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 15,
+  },
+  headerTitle: {
+    flex: 6,
+    // paddingLeft: 60,
+    alignItems: 'center',
+  },
+  headerRight: {
+    flex: 2,
+  },
 
   Textinput: {
     borderWidth: 2,
@@ -739,6 +797,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     borderRadius: 10,
     paddingLeft: 10,
+    marginTop: 10,
     color: 'black',
   },
   dropdownContainer: {

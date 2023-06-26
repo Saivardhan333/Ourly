@@ -31,16 +31,26 @@ const Dashboard = () => {
   const [submit, setsubmit] = useState(true);
   const [submitData, setsubmitData] = useState(false);
   const [value, setValue] = useState(moment());
-  const [bargraphdata, setbargraphdata] = useState();
-  const [pieData1, setpieData] = useState();
   const [startDate, setStartDate] = useState(
-    currentDates.clone().startOf('isoWeek').toDate(),
+    currentDates.startOf('isoWeek').toDate(),
   );
   const [endDate, setEndDate] = useState(
-    currentDates.clone().endOf('isoWeek').toDate(),
+    currentDates.startOf('isoWeek').toDate(),
   );
   const [weekdata, setweekdata] = useState(false);
   const [displayedDates, setDisplayedDate] = useState(currentDates);
+  useEffect(() => {
+    const weekDates = getweekdays(value);
+    setstartofweek(moment(weekDates[0]).format('YYYY-MM-DD'));
+    setendofweek(moment(weekDates[1]).format('YYYY-MM-DD'));
+    setStartDate(weekDates[0]);
+    setEndDate(weekDates[1]);
+    graphdataa(
+      moment(weekDates[0]).format('YYYY-MM-DD'),
+      moment(weekDates[1]).format('YYYY-MM-DD'),
+    );
+  }, [value]);
+  //console.log(startofweek, endofweek);
   const setDates = (dates, displayedDates) => {
     if (dates.startDate) {
       // console.log(dates.startDate.format('YYYY-MM-DD'));
@@ -68,10 +78,134 @@ const Dashboard = () => {
         setValue(nextMonth);
       }
     }
+
+    // console.log(
+    //   'llllllllll',
+    //   parseFloat(dates.displayedDate.format('MM')) <
+    //     parseFloat(displayedDate.format('MM')),
+    // );
   };
+  // const weekaa = getweekdays(value);
+  // setStartDate(weekaa[0]);
+  // setEndDate(weekaa[1]);
+  // useEffect(() => {
+  //   startOfWeek = moment().startOf('week');
+  //   endOfWeek = moment().endOf('week');
+  //   setStartDate(startOfWeek);
+  //   setEndDate(endOfWeek);
+  // }, []);
+  //let graphdata1 = [];
+  useEffect(() => {
+    retrieveData();
+  }, []);
+
+  useEffect(() => {
+    axiosdata();
+  }, [startofweek, endofweek]);
+
+  let abc = {
+    start_date: startofweek,
+    end_date: endofweek,
+    employee_id: employeeid,
+    role_id: 6435,
+  };
+  const retrieveData = async () => {
+    console.log('lkdjjd');
+    try {
+      const storedResponse = await AsyncStorage.getItem('loginResponse');
+      if (storedResponse !== null) {
+        const loginResponse = JSON.parse(storedResponse);
+        setemployeeid(loginResponse[0].employee_id);
+        // Use the retrieved data in your screen
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  let staticData = 0;
+  function axiosdata() {
+    console.log('axios data working fine . . . . ');
+    axios
+      .post(
+        `${baseurl}/api/analyze/get/dashboad/all/tasks/weekly/filter/by/descrip`,
+        abc,
+      )
+      .then(response => {
+        console.log('axios data working fine');
+        setresponse(response.data.response);
+      })
+      .catch(error => console.log(error));
+  }
+  function graphdataa(start, end, emp) {
+    console.log('gggggggggggggggggg');
+    axios
+      .post(`${baseurl}/api/analyze/get/dashboad/overview`, {
+        start_date: start,
+        end_date: end,
+        employee_id: emp,
+        role_id: 6435,
+      })
+      .then(response => {
+        // let data = [...response.data];
+        setgraphdata(response?.data);
+        console.log('data has been set successfully', response.data?.response);
+        let arr =
+          response?.data?.response.length > 0
+            ? response?.data?.response?.[1]
+            : [];
+        // arr.length > 0 &&
+        //   arr?.map((item, index) => {
+        //     return {
+        //       ...val,
+        //       label: item.task_created_datetime,
+        //       value: item.total_time,
+        //     };
+        //   });
+        console.log(
+          '================================arrarr================================',
+          typeof arr,
+        );
+      })
+      .catch(error => console.log('data has been set error: ' + error));
+  }
+  // console.log('ddddddddddddddddddaaaaaaaaaaaaatttttttttaaaaaaaa', graphdata);
+  // useEffect(() => {
+  //   retrieveData;
+  //   setLoading(true);
+  //   axios
+  //     .post(
+  //       'http://192.168.0.207:4178/api/timesheet/get/projects/overview/each/week',
+  //       abc,
+  //     )
+  //     .then(response => {
+  //       //    console.log('pppppppppppppppp', response.data.response);
+  //       //setProjectData(response.data);
+  //       // const updatedProject = response.data.response.map(val => ({
+  //       //   project_name: val.project_name,
+  //       //   monday: val.monday,
+  //       //   tuesday: val.tuesday,
+  //       //   wednesday: val.wednesday,
+  //       //   thursday: val.thursday,
+  //       //   friday: val.friday,
+  //       //   saturday: val.saturday,
+  //       //   sunday: val.sunday,
+  //       //   total_hour: val.total_hour,
+  //       // }));
+  //       // setproject(updatedProject);
+
+  //       setLoading(false);
+  //     })
+  //     .catch(error => {
+  //       console.log(error);
+  //       setLoading(false);
+  //       // Handle the error here
+  //     });
+  // }, [startofweek, endofweek]);
   function getweekdays(val) {
     const moment = require('moment');
-    const selectedDate = moment(val);
+    //  console.log('valuee', val);
+    // Assuming you have a selectedDate variable representing the chosen date from the calendar
+    const selectedDate = moment(val); // Example date, replace with your selected date
 
     // Set Monday as the start of the week
     moment.updateLocale('en', {
@@ -81,118 +215,148 @@ const Dashboard = () => {
     });
 
     // Get the start of the current week (Monday)
-    const startOfWeek = selectedDate.clone().startOf('isoWeek').toDate();
+    const startOfWeek = selectedDate.startOf('isoWeek').add(0, 'days').toDate();
 
     // Get the end of the current week (Sunday)
-    const endOfWeek = selectedDate.clone().endOf('isoWeek').toDate();
+    const endOfWeek = selectedDate.startOf('isoWeek').add(6, 'days').toDate();
 
     // Push the start and end dates of the week into an array
     const week = [];
     week.push(startOfWeek);
     week.push(endOfWeek);
-    // console.log('Start of the week:', startOfWeek);
-    // console.log('End of the week:', endOfWeek);
     return week;
   }
+  // console.log('}}}}}}}}}', startofweek, endofweek);
+  const startweekdate = new Date(startofweek);
+  const endingweekdate = new Date(endofweek);
 
-  const staticData = [
-    {
-      project_id: 5771,
-      project_name: 'Internal Attended Training',
-      project_color_code: 'rgb(217, 26, 118)',
-      client_id: 17,
-      client_name: 'Pronteff',
-      task_description:
-        'Working On Ourly Mobile App (Holidays List with Static Data)',
-      task_total_time: '03:36:00',
-    },
-    {
-      project_id: 5771,
-      project_name: 'Internal Attended Training',
-      project_color_code: 'rgb(217, 26, 118)',
-      client_id: 17,
-      client_name: 'Pronteff',
-      task_description: 'Working On Ourly Mobile App Date Range Picker Api',
-      task_total_time: '03:37:00',
-    },
-    {
-      project_id: 5771,
-      project_name: 'Internal Attended Training',
-      project_color_code: 'rgb(217, 26, 118)',
-      client_id: 17,
-      client_name: 'Pronteff',
-      task_description: 'Working On Ourly Mobile App Date Range Picker Api',
-      task_total_time: '03:30:00',
-    },
-    {
-      project_id: 5771,
-      project_name: 'Internal Attended Training',
-      project_color_code: 'rgb(217, 26, 118)',
-      client_id: 17,
-      client_name: 'Pronteff',
-      task_description: 'Working On Ourly Mobile App Date Range Picker Api',
-      task_total_time: '01:30:00',
-    },
-    {
-      project_id: 5771,
-      project_name: 'Internal Attended Training',
-      project_color_code: 'rgb(217, 26, 118)',
-      client_id: 17,
-      client_name: 'Pronteff',
-      task_description:
-        'Working On Ourly Mobile App Dynamic Timesheet API Integration',
-      task_total_time: '03:35:00',
-    },
-    {
-      project_id: 5771,
-      project_name: 'Internal Attended Training',
-      project_color_code: 'rgb(217, 26, 118)',
-      client_id: 17,
-      client_name: 'Pronteff',
-      task_description:
-        'Working On Ourly Mobile App Dynamic Timesheet API Integration',
-      task_total_time: '03:30:00',
-    },
-    {
-      project_id: 5771,
-      project_name: 'Internal Attended Training',
-      project_color_code: 'rgb(217, 26, 118)',
-      client_id: 17,
-      client_name: 'Pronteff',
-      task_description:
-        'Working On Ourly Mobile App Dynamic Timesheet API Integration',
-      task_total_time: '01:45:00',
-    },
-    {
-      project_id: 5771,
-      project_name: 'Internal Attended Training',
-      project_color_code: 'rgb(217, 26, 118)',
-      client_id: 17,
-      client_name: 'Pronteff',
-      task_description:
-        'Working On Ourly Mobile App Forgot Password Api Integration',
-      task_total_time: '03:30:00',
-    },
-    {
-      project_id: 5771,
-      project_name: 'Internal Attended Training',
-      project_color_code: 'rgb(217, 26, 118)',
-      client_id: 17,
-      client_name: 'Pronteff',
-      task_description:
-        'Working On Ourly Mobile App Forgot Password Api Integration',
-      task_total_time: '01:20:00',
-    },
-    {
-      project_id: 5771,
-      project_name: 'Internal Attended Training',
-      project_color_code: 'rgb(217, 26, 118)',
-      client_id: 17,
-      client_name: 'Pronteff',
-      task_description: 'Working On Ourly Mobile App Log In Api ',
-      task_total_time: '03:35:00',
-    },
+  const middleDates = [];
+
+  // Include the start date
+  middleDates.push(startofweek);
+
+  // Calculate the middle dates
+  const current = new Date(startweekdate);
+  current.setDate(current.getDate() + 1); // Increment current date by 1
+  while (current < endingweekdate) {
+    middleDates.push(current.toISOString().slice(0, 10)); // Add current date to the array
+    current.setDate(current.getDate() + 1); // Increment current date by 1
+  }
+  // middleDates.push(endingweekdate.toISOString().slice(0, 10));
+  // Include the end date
+  // middleDates.push(endingweekdate.toISOString().slice(0, 10));
+  // console.log(']]]]]]]]]]]]]', middleDates);
+  const pieData = [
+    {value: 70, color: '#d63384'},
+    {value: 10, color: '#fff'},
+    {value: 10, color: 'black'},
+    {value: 10, color: 'red'},
   ];
+
+  const body = {
+    employee_id: 9968,
+    end_date: '2023-05-28',
+    start_date: '2023-05-22',
+  };
+
+  // const staticData = [
+  //   {
+  //     project_id: 5771,
+  //     project_name: 'Internal Attended Training',
+  //     project_color_code: 'rgb(217, 26, 118)',
+  //     client_id: 17,
+  //     client_name: 'Pronteff',
+  //     task_description:
+  //       'Working On Ourly Mobile App (Holidays List with Static Data)',
+  //     task_total_time: '03:36:00',
+  //   },
+  //   {
+  //     project_id: 5771,
+  //     project_name: 'Internal Attended Training',
+  //     project_color_code: 'rgb(217, 26, 118)',
+  //     client_id: 17,
+  //     client_name: 'Pronteff',
+  //     task_description: 'Working On Ourly Mobile App Date Range Picker Api',
+  //     task_total_time: '03:37:00',
+  //   },
+  //   {
+  //     project_id: 5771,
+  //     project_name: 'Internal Attended Training',
+  //     project_color_code: 'rgb(217, 26, 118)',
+  //     client_id: 17,
+  //     client_name: 'Pronteff',
+  //     task_description: 'Working On Ourly Mobile App Date Range Picker Api',
+  //     task_total_time: '03:30:00',
+  //   },
+  //   {
+  //     project_id: 5771,
+  //     project_name: 'Internal Attended Training',
+  //     project_color_code: 'rgb(217, 26, 118)',
+  //     client_id: 17,
+  //     client_name: 'Pronteff',
+  //     task_description: 'Working On Ourly Mobile App Date Range Picker Api',
+  //     task_total_time: '01:30:00',
+  //   },
+  //   {
+  //     project_id: 5771,
+  //     project_name: 'Internal Attended Training',
+  //     project_color_code: 'rgb(217, 26, 118)',
+  //     client_id: 17,
+  //     client_name: 'Pronteff',
+  //     task_description:
+  //       'Working On Ourly Mobile App Dynamic Timesheet API Integration',
+  //     task_total_time: '03:35:00',
+  //   },
+  //   {
+  //     project_id: 5771,
+  //     project_name: 'Internal Attended Training',
+  //     project_color_code: 'rgb(217, 26, 118)',
+  //     client_id: 17,
+  //     client_name: 'Pronteff',
+  //     task_description:
+  //       'Working On Ourly Mobile App Dynamic Timesheet API Integration',
+  //     task_total_time: '03:30:00',
+  //   },
+  //   {
+  //     project_id: 5771,
+  //     project_name: 'Internal Attended Training',
+  //     project_color_code: 'rgb(217, 26, 118)',
+  //     client_id: 17,
+  //     client_name: 'Pronteff',
+  //     task_description:
+  //       'Working On Ourly Mobile App Dynamic Timesheet API Integration',
+  //     task_total_time: '01:45:00',
+  //   },
+  //   {
+  //     project_id: 5771,
+  //     project_name: 'Internal Attended Training',
+  //     project_color_code: 'rgb(217, 26, 118)',
+  //     client_id: 17,
+  //     client_name: 'Pronteff',
+  //     task_description:
+  //       'Working On Ourly Mobile App Forgot Password Api Integration',
+  //     task_total_time: '03:30:00',
+  //   },
+  //   {
+  //     project_id: 5771,
+  //     project_name: 'Internal Attended Training',
+  //     project_color_code: 'rgb(217, 26, 118)',
+  //     client_id: 17,
+  //     client_name: 'Pronteff',
+  //     task_description:
+  //       'Working On Ourly Mobile App Forgot Password Api Integration',
+  //     task_total_time: '01:20:00',
+  //   },
+  //   {
+  //     project_id: 5771,
+  //     project_name: 'Internal Attended Training',
+  //     project_color_code: 'rgb(217, 26, 118)',
+  //     client_id: 17,
+  //     client_name: 'Pronteff',
+  //     task_description: 'Working On Ourly Mobile App Log In Api ',
+  //     task_total_time: '03:35:00',
+  //   },
+  // ];
   const graphdata = {
     status: 200,
     time: '2023-6-1 10:34:18',
@@ -335,104 +499,64 @@ const Dashboard = () => {
       ],
     ],
   };
-  const week = 0;
-  useEffect(() => {
-    retrieveData();
-  }, [startDate, endDate]);
-  const retrieveData = async () => {
-    let loginResponse;
 
-    try {
-      const storedResponse = await AsyncStorage.getItem('loginResponse');
-      if (storedResponse !== null) {
-        loginResponse = JSON.parse(storedResponse);
-        setemployeeid(loginResponse[0].employee_id);
-        // Use the retrieved data in your screen
+  // console.log('+++++++++++++++>', graphdata);
+  // console.log('---------------->', graphdata1);
+  const pieDataa = [];
+  let ssArray = [];
+  ssArray = middleDates?.map((val, index, arr) => datafun(val, index, arr));
+
+  function datafun(data) {
+    const stacks = [];
+    if (graphdata1 != null) {
+      const dataa = graphdata1?.response[1];
+      const res = dataa?.map(obj =>
+        obj.value.filter(pro => pro?.task_created_datetime === data),
+      );
+
+      res?.forEach(items => {
+        let stackObj = 0;
+        let sObj = 0;
+        items?.forEach(item => {
+          const timeParts = item.total_time.split(':');
+          const hours = parseInt(timeParts[0]);
+          const minutes = parseInt(timeParts[1]);
+          const seconds = parseInt(timeParts[2]);
+
+          const decimalHours = hours + minutes / 60 + seconds / 3600;
+          const formattedHours = decimalHours.toFixed(1);
+          stackObj = {
+            value: parseFloat(formattedHours),
+            color: item.project_color_code,
+          };
+          sObj = {
+            value: parseFloat(formattedHours),
+            color: item.project_color_code,
+          };
+          // console.log(item.task_created_datetime + '===' + data);
+          // console.log(data);
+          //if (item.task_created_datetime === data) {
+          stacks.push(stackObj);
+          pieDataa.push(sObj);
+          //}
+          // else if(){}
+        });
+      });
+
+      // If no items found for the current date, add sObj with value 0 and color 'red'
+      if (stacks?.length === 0) {
+        const sObj = {
+          value: 0,
+          color: null,
+        };
+        stacks?.push(sObj);
       }
-    } catch (error) {
-      console.log(error);
     }
-    let weeks = getweekdays();
-    function axiosdata() {
-      console.log('axios data working fine . . . . ');
-      axios
-        .post(
-          `${baseurl}/api/analyze/get/dashboad/all/tasks/weekly/filter/by/descrip`,
-          {
-            start_date: moment(startDate).format('YYYY-MM-DD'),
-            end_date: moment(endDate).format('YYYY-MM-DD'),
-            employee_id: loginResponse[0].employee_id,
-            role_id: 6435,
-          },
-        )
-        .then(response => {
-          console.log('axios data working fine');
-          setresponse(response?.data?.response);
-        })
-        .catch(error => console.log(error));
-    }
-
-    function graphdataa(start, end, emp) {
-      axios
-        .post(`${baseurl}/api/analyze/get/dashboad/overview`, {
-          start_date: moment(startDate).format('YYYY-MM-DD'),
-          end_date: moment(endDate).format('YYYY-MM-DD'),
-          employee_id: loginResponse[0].employee_id,
-          role_id: 6435,
-        })
-        .then(response => {
-          // let data = [...response.data];
-          setgraphdata(response?.data);
-          console.log(
-            '=====>',
-            response?.data.response[1][0].value.map(val => val),
-          );
-          let arr = response?.data?.response[1].map(val1 =>
-            val1.value.map(val => val),
-          );
-          arr = arr.flat();
-          console.log('}}}}}}}', arr);
-          const stackData = [];
-          if (arr.length > 0) {
-            arr?.forEach(item => {
-              const existingStack = stackData?.find(
-                stack => stack?.label === item?.task_created_datetime,
-              );
-
-              if (existingStack) {
-                existingStack?.stacks?.push({
-                  value: parseFloat(item?.total_time),
-                  color: item?.project_color_code,
-                });
-              } else {
-                stackData?.push({
-                  stacks: [
-                    {
-                      value: parseFloat(item?.total_time),
-                      color: item?.project_color_code,
-                    },
-                  ],
-                  label: item?.task_created_datetime,
-                });
-              }
-            });
-          }
-          setbargraphdata(stackData);
-
-          let pieData = arr?.map(obj => ({
-            value: parseFloat(obj?.total_time?.split(':')[0]),
-            color: obj?.project_color_code,
-          }));
-          console.log('MMMMMMMMMMMMMMmm', pieData);
-          setpieData(pieData);
-        })
-        .catch(error => console.log('data has been set error: ' + error));
-    }
-    axiosdata();
-    graphdataa();
-    weeks = [];
-    console.log('???????????????????/', pieData1);
-  };
+    return {
+      stacks,
+      label: data,
+    };
+  }
 
   return (
     <>
@@ -466,7 +590,7 @@ const Dashboard = () => {
               paddingLeft: 20,
               marginTop: 10,
             }}>
-            {moment(startDate).format('YYYY-MM-DD')}_
+            {moment(startDate).format('YYYY-MM-DD')} _{' '}
             {moment(endDate).format('YYYY-MM-DD')}
           </Text>
         </DateRangePickers>
@@ -543,7 +667,14 @@ const Dashboard = () => {
               justifyContent: 'center',
               margin: 15,
             }}>
-            <BarChart width={370} spacing={74} stackData={bargraphdata} />
+            {ssArray.length > 0 ? (
+              <BarChart
+                barWidth={20}
+                width={370}
+                spacing={74}
+                stackData={ssArray.length > 0 ? ssArray : []}
+              />
+            ) : null}
             {/* <StackedBarChart
               data={data}
               width={370}
@@ -565,23 +696,19 @@ const Dashboard = () => {
             style={{
               alignItems: 'center',
             }}>
-            {pieData1 ? (
-              <PieChart
-                donut
-                innerRadius={50}
-                data={pieData1}
-                radius={80}
-                centerLabelComponent={() => {
-                  return (
-                    <Text style={{fontSize: 30}}>
-                      {graphdata1?.response?.[0]?.total_time?.slice(0, 5)}
-                    </Text>
-                  );
-                }}
-              />
-            ) : (
-              []
-            )}
+            <PieChart
+              donut
+              innerRadius={50}
+              data={pieDataa}
+              radius={80}
+              centerLabelComponent={() => {
+                return (
+                  <Text style={{fontSize: 30}}>
+                    {graphdata1?.response?.[0]?.total_time?.slice(0, 5)}
+                  </Text>
+                );
+              }}
+            />
           </View>
           <View
             style={{
@@ -614,7 +741,6 @@ const Dashboard = () => {
           <Text style={{fontSize: 25}}>Most Tracked Activities</Text>
           <FlatList
             data={response1}
-            keyExtractor={(item, index) => item?.task_id}
             renderItem={({item}) => (
               <View
                 style={{

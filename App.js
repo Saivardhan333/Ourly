@@ -2,7 +2,6 @@ import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import AuthenticationNavigation from './src/Components/AuthenticationNavigation';
 import {createStackNavigator} from '@react-navigation/stack';
-import Homes from './src/Screens/Homes';
 import Authentication from './src/Components/AuthenticationNavigation';
 import DrawerNavigator from './src/Components/DrawerNavigators';
 

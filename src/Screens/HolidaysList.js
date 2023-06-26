@@ -1,90 +1,42 @@
-import React from 'react';
-import {View, Text, StyleSheet, FlatList, StatusBar} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  StatusBar,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import {baseurl} from '../utils/urls';
 import {SafeAreaView} from 'react-native-safe-area-context';
-const HolidaysList = () => {
-  const holliday = [
-    {
-      's.no': 1,
-      holidays: 'Republic Day',
-      date: '26 January,2023',
-      day: 'Thursday',
-      id: 1,
-    },
-    {
-      's.no': 2,
-      holidays: 'Maha Shivaratri',
-      date: '18 February,2023',
-      day: 'Saturday',
-      id: 2,
-    },
-    {
-      's.no': 3,
-      holidays: 'Holi',
-      date: '08 March,2023',
-      day: 'Wednesday',
-      id: 3,
-    },
-    {
-      's.no': 4,
-      holidays: 'Ugadi',
-      date: '22 March ,2023',
-      day: 'Wednesday',
-      id: 4,
-    },
-    {
-      's.no': 5,
-      holidays: 'Independence Day',
-      date: '15 August,2023',
-      day: 'Tuesday',
-      id: 5,
-    },
-    {
-      's.no': 6,
-      holidays: 'Vinayaka Chavathi',
-      date: '18 September,2023',
-      day: 'Monday',
-      id: 6,
-    },
-    {
-      's.no': 7,
-      holidays: 'Gandhi Jayanthi',
-      date: '02 October,2023',
-      day: 'Monday',
-      id: 7,
-    },
-    {
-      's.no': 8,
-      holidays: 'Vijayadasami',
-      date: '24 October,2023',
-      day: 'Tuesday',
-      id: 8,
-    },
-    {
-      's.no': 9,
-      holidays: 'Diwali',
-      date: '13 November,2023',
-      day: 'Monday',
-      id: 9,
-    },
-    {
-      's.no': 10,
-      holidays: 'Christmas',
-      date: '25 December,2023',
-      day: 'Monday',
-      id: 10,
-    },
-  ];
+import Icon from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
+const HolidaysList = ({navigation}) => {
+  const [holliday, setholliday1] = useState();
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    setLoading(true);
+    axios
+      .get(`${baseurl}/api/holidays/get/all/list`)
+      .then(response => {
+        setholliday1(response.data.response);
+      })
+      .catch(error => console.log(error));
+    setLoading(false);
+  }, []);
   return (
     <View style={styles.screen}>
-      <View style={{height: 40}}>
-        <Text
-          style={{
-            fontSize: 22,
-            color: 'black',
-            alignSelf: 'center',
-          }}>
-          HOLIDAY LIST
-        </Text>
+      <View style={styles.drawerHeader}>
+        <View style={{flex: 2, alignItems: 'center'}}>
+          <TouchableOpacity onPress={() => navigation.openDrawer()}>
+            <Icon name="menu" size={30} style={{}} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.headerTitle}>
+          <Text style={{fontSize: 25, fontWeight: 'bold'}}>Holidays List</Text>
+        </View>
+        <Text style={styles.headerRight}></Text>
       </View>
       <View
         style={{
@@ -94,6 +46,8 @@ const HolidaysList = () => {
           justifyContent: 'center',
           alignItems: 'center',
           borderRadius: 5,
+          marginTop: 10,
+          elevation: 8,
         }}>
         <Text style={{flex: 3.5, fontSize: 22, color: 'black', paddingLeft: 5}}>
           Holiday
@@ -101,48 +55,78 @@ const HolidaysList = () => {
         <Text style={{flex: 2.5, fontSize: 22, color: 'black'}}>Day</Text>
         <Text style={{flex: 4, fontSize: 22, color: 'black'}}>Date</Text>
       </View>
-      <FlatList
-        data={holliday}
-        renderItem={({item}) => (
-          <View
-            style={{
-              flexDirection: 'row',
-              backgroundColor: 'black',
-              marginTop: 20,
-              borderRadius: 5,
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: 40,
-            }}>
-            <Text
+      {loading ? (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <ActivityIndicator size="large" color="Black" />
+        </View>
+      ) : (
+        <FlatList
+          data={holliday}
+          renderItem={({item}) => (
+            <View
               style={{
-                flex: 3.5,
-                color: 'white',
-                fontSize: 14,
-                paddingLeft: 5,
+                flexDirection: 'row',
+                backgroundColor: '#fff',
+                marginTop: 20,
+                elevation: 6,
+                borderRadius: 5,
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: 40,
               }}>
-              {item.holidays}
-            </Text>
-            <Text style={{flex: 2.5, color: 'white', fontSize: 14}}>
-              {item.day}
-            </Text>
-            <Text
-              style={{
-                flex: 4,
-                color: 'white',
-                fontSize: 14,
-              }}>
-              {item.date}
-            </Text>
-          </View>
-        )}
-      />
+              <Text
+                style={{
+                  flex: 3.5,
+                  color: 'black',
+                  fontSize: 14,
+                  paddingLeft: 5,
+                }}>
+                {item.holidays}
+              </Text>
+              <Text style={{flex: 2.5, color: '#000000', fontSize: 14}}>
+                {item.day}
+              </Text>
+              <Text
+                style={{
+                  flex: 4,
+                  color: '#000000',
+                  fontSize: 14,
+                }}>
+                {item.date}
+              </Text>
+            </View>
+          )}
+        />
+      )}
     </View>
   );
 };
 const styles = StyleSheet.create({
   screen: {
     margin: 10,
+  },
+  drawerHeader: {
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 15,
+    elevation: 10,
+  },
+  headerTitle: {
+    flex: 6,
+    // paddingLeft: 60,
+    alignItems: 'center',
+  },
+  headerRight: {
+    flex: 2,
   },
 });
 export default HolidaysList;

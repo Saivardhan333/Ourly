@@ -53,13 +53,14 @@ const BottomTabNavigator = () => {
         name="TimeSheet"
         component={TimeSheet}
         options={{
-          headerStyle: {
-            backgroundColor: 'lightblue',
-            height: 40,
-            borderRadius: 10,
-          },
-          headerTitleStyle: {fontSize: 25, color: 'white'},
-          headerTitleAlign: 'center',
+          headerShown: false,
+          // headerStyle: {
+          //   backgroundColor: 'lightblue',
+          //   height: 40,
+          //   borderRadius: 10,
+          // },
+          // headerTitleStyle: {fontSize: 25, color: 'white'},
+          // headerTitleAlign: 'center',
           tabBarLabel: ({focused}) => (
             <Text
               style={{

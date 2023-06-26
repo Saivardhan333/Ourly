@@ -10,6 +10,7 @@ import {
 
 import {PieChart} from 'react-native-gifted-charts';
 import {BarChart} from 'react-native-gifted-charts';
+import {baseurl} from '../utils/urls';
 import moment from 'moment';
 import Icons from 'react-native-vector-icons/AntDesign';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -18,11 +19,14 @@ import {useNavigation} from '@react-navigation/native';
 import DateRangePickers from 'react-native-daterange-picker';
 import {ScrollView} from 'react-native-gesture-handler';
 import {StackedBarChart} from 'react-native-chart-kit';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const Reports = () => {
   const navigation = useNavigation();
   const currentDates = moment();
   const [project, setproject] = useState([]);
   const [startofweek, setstartofweek] = useState();
+  const [graphdata1, setgraphdata] = useState();
+  const [employeeid, setemployeeid] = useState();
   const [endofweek, setendofweek] = useState();
   const [loading, setLoading] = useState(true);
   const [submit, setsubmit] = useState(true);
@@ -87,24 +91,56 @@ const Reports = () => {
   //   setStartDate(startOfWeek);
   //   setEndDate(endOfWeek);
   // }, []);
-  let abc = {
-    first_week_day: startofweek,
-    last_week_day: endofweek,
-    employee_id: 982,
-  };
+  useEffect(() => {
+    retrieveData();
+  }, []);
+  useEffect(() => {
+    console.log('Done done done111112222. . .', employeeid);
+    retrieveData();
+  }, [startofweek, endofweek]);
   const retrieveData = async () => {
     try {
       const storedResponse = await AsyncStorage.getItem('loginResponse');
       if (storedResponse !== null) {
         const loginResponse = JSON.parse(storedResponse);
-        abc = abc.employee_id = loginResponse[0].employee_id;
-
+        setemployeeid(loginResponse[0]?.employee_id);
+        const weekDates = getweekdays(value);
+        const abc = {
+          start_date: moment(weekDates[0]).format('YYYY-MM-DD'),
+          end_date: moment(weekDates[1]).format('YYYY-MM-DD'),
+          employee_id: loginResponse[0]?.employee_id,
+          role_id: 6435,
+        };
         // Use the retrieved data in your screen
+        console.log('<<a>>b>>c>>', abc);
+        graphdataa(abc);
       }
     } catch (error) {
       console.log(error);
     }
   };
+  function graphdataa(abc) {
+    console.log('gggggggggggggggggg');
+    console.log('????????????????>', abc);
+    axios
+      .post(`${baseurl}/api/analyze/get/dashboad/overview`, abc)
+      .then(response => {
+        console.log('<<<<<<<<<>>>>>>>>>>>>>>>..,', response?.data?.response);
+        // let data = [...response.data];
+        setgraphdata(response.data);
+        let arr = response?.data?.response[1][0].value.map(val => val);
+        console.log('arrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr', arr);
+        let pieData1;
+        if (arr.length > 0) {
+          pieData1 = arr?.map(obj => ({
+            value: parseInt(obj?.total_time?.split(':')[0]),
+            color: obj?.project_color_code,
+          }));
+        }
+        console.log('><<<<<<<<<<<<<<<<<<<<<<>', pieData1);
+      })
+      .catch(error => console.log('data has been set errro'));
+  }
   // useEffect(() => {
   //   retrieveData;
   //   setLoading(true);
@@ -194,11 +230,11 @@ const Reports = () => {
     {value: 10, color: 'red'},
   ];
 
-  const body = {
-    employee_id: 3209,
-    end_date: '2023-05-28',
-    start_date: '2023-05-22',
-  };
+  // const body = {
+  //   employee_id: 9968,
+  //   end_date: '2023-05-28',
+  //   start_date: '2023-05-22',
+  // };
   const staticData = [
     {
       project_id: 5771,
@@ -501,40 +537,57 @@ const Reports = () => {
   //   {value: 3.5, label: middleDates[5], frontColor: '#07bc0c'},
   //   {value: 3.5, label: middleDates[6], frontColor: '#07bc0c'},
   // ];
-  const ssArray = middleDates.map(val => datafun(val));
+  const ssArray = middleDates?.map(val => datafun(val));
   function datafun(data) {
-    const dataa = graphdata.response[1];
-    const res = dataa.map(val =>
-      val.value.filter(pro => pro.task_created_datetime === data),
+    const dataa = graphdata1?.response[1];
+    const res = dataa?.map(val =>
+      val?.value?.filter(pro => pro?.task_created_datetime === data),
     );
-    const uniqueData = new Set();
-    res.forEach(items => {
+    let uniqueData = new Set();
+    res?.forEach(items => {
       let formattedHours = 0;
-      items.forEach(item => {
-        const timeParts = item.total_time.split(':');
+      items?.forEach(item => {
+        const timeParts = item?.total_time?.split(':');
         const hours = parseInt(timeParts[0]);
         const minutes = parseInt(timeParts[1]);
         const seconds = parseInt(timeParts[2]);
         const decimalHours = hours + minutes / 60 + seconds / 3600;
         formattedHours = decimalHours.toFixed(1);
 
-        pieDataa.push({
+        pieDataa?.push({
           value: parseFloat(formattedHours),
           color: item.project_color_code,
         });
       });
       if (!uniqueData.has(data)) {
-        ff.push({
+        ff?.push({
           value: parseFloat(formattedHours),
           label: data,
           frontColor: '#8dc572',
         });
 
-        uniqueData.add(data); // Add the data to the set
+        uniqueData?.add(data); // Add the data to the set
       }
     });
   }
+  //const totalValue = pieDataa.reduce((sum, data) => sum + data.value, 0);
+  const aggregatedData = {};
+
+  // Aggregate the values for entries with the same color
+  for (const data of pieDataa) {
+    if (aggregatedData[data.color]) {
+      aggregatedData[data.color] += data.value;
+    } else {
+      aggregatedData[data.color] = data.value;
+    }
+  }
+
+  // Create a new array with the aggregated values
+  const updatedPieDataa = Object.entries(aggregatedData).map(
+    ([color, value]) => ({color, value}),
+  );
   console.log('==============>', pieDataa);
+
   // const ssArray = middleDates.map((val, index, arr) =>
   //   datafun(val, index, arr),
   // );
@@ -662,7 +715,7 @@ const Reports = () => {
   //   barPercentage: 0.5,
   //   useShadowColorFromDataset: false, // optional
   // };
-
+  graphdata1?.response?.[1]?.map(val => console.log(val?.value));
   return (
     <>
       <View style={styles.drawerHeader}>
@@ -748,19 +801,19 @@ const Reports = () => {
             <View style={{flex: 3}}>
               <Text style={styles.text}>TotalTime</Text>
               <Text style={{fontSize: 16}}>
-                {graphdata.response[0].total_time}
+                {graphdata1?.response[0]?.total_time}
               </Text>
             </View>
             <View style={{flex: 4}}>
               <Text style={styles.text}>Top Project</Text>
               <Text style={{fontSize: 16}}>
-                {graphdata.response[0].top_project.project_name}
+                {graphdata1?.response[0]?.top_project?.project_name}
               </Text>
             </View>
             <View style={{flex: 3}}>
               <Text style={styles.text}>Top Client</Text>
               <Text style={{fontSize: 16}}>
-                {graphdata.response[0].top_project.client_name}
+                {graphdata1?.response[0]?.top_project?.client_name}
               </Text>
             </View>
           </View>
@@ -780,7 +833,7 @@ const Reports = () => {
                 isAnimated
               />
             ) : (
-              <Text>Loading...</Text>
+              <Text></Text>
             )}
 
             {/* <StackedBarChart
@@ -807,12 +860,12 @@ const Reports = () => {
             <PieChart
               donut
               innerRadius={50}
-              data={pieDataa}
+              data={updatedPieDataa}
               radius={80}
               centerLabelComponent={() => {
                 return (
                   <Text style={{fontSize: 30}}>
-                    {graphdata.response[0].total_time.slice(0, 5)}
+                    {graphdata1?.response[0]?.total_time?.slice(0, 5)}
                   </Text>
                 );
               }}
@@ -830,25 +883,47 @@ const Reports = () => {
             }}>
             <View style={{flex: 4}}>
               <Text style={styles.text}>Project</Text>
-              {graphdata.response[1].map(val => (
-                <Text style={{fontSize: 16}}>{val.project_name}</Text>
+              {graphdata1?.response[1]?.map(val => (
+                <Text style={{fontSize: 16}}>{val?.project_name}</Text>
               ))}
             </View>
             <View style={{flex: 3}}>
               <Text style={styles.text}>Client</Text>
-              {graphdata.response[1].map(val =>
-                val.value.map(val1 => (
-                  <Text style={{fontSize: 16}}>{val1.client_name}</Text>
-                )),
-              )}
+              {graphdata1?.response[1]?.map(val => {
+                const uniqueClientNames = val?.value?.filter(
+                  (val1, index, array) => {
+                    // Filter out client names that appear after the first occurrence in the array
+                    return (
+                      array.findIndex(
+                        item => item.client_name === val1.client_name,
+                      ) === index
+                    );
+                  },
+                );
+
+                return uniqueClientNames.map(val1 => (
+                  <Text style={{fontSize: 16}}>{val1?.client_name}</Text>
+                ));
+              })}
             </View>
             <View style={{flex: 3}}>
               <Text style={styles.text}>Duration</Text>
-              {graphdata.response[1].map(val =>
-                val.value.map(val1 => (
-                  <Text style={{fontSize: 16}}>{val1.total_time}</Text>
-                )),
-              )}
+              {graphdata1?.response[1]?.map(val => {
+                const uniqueDuration = val?.value?.filter(
+                  (val1, index, array) => {
+                    // Filter out client names that appear after the first occurrence in the array
+                    return (
+                      array.findIndex(
+                        item => item.total_time === val1.total_time,
+                      ) === index
+                    );
+                  },
+                );
+
+                return uniqueDuration.map(val1 => (
+                  <Text style={{fontSize: 16}}>{val1?.total_time}</Text>
+                ));
+              })}
             </View>
           </View>
         </View>
